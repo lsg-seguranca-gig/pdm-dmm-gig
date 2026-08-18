@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SGG - Calibração Diária de PDM</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --card-border: #334155;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #38bdf8;
+            --accent-hover: #0284c7;
+            --success: #22c55e;
+            --danger: #ef4444;
+            --input-bg: #0f172a;
+            --input-border: #475569;
+            --radius: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            padding: 12px;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 500px;
+            background-color: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius);
+            padding: 20px 16px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+            margin-bottom: 24px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .header h1 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .header p {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .badge-norma {
+            display: inline-block;
+            background: rgba(56, 189, 248, 0.1);
+            color: var(--accent);
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            font-size: 0.7rem;
+            padding: 2px 8px;
+            border-radius: 20px;
+            margin-top: 6px;
+            font-weight: 600;
+        }
+
+        .pdm-selector-box {
+            background: var(--input-bg);
+            border: 2px solid var(--accent);
+            border-radius: var(--radius);
+            padding: 14px;
+            margin-bottom: 18px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-main);
+            margin-bottom: 6px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--input-bg);
+            border: 1px solid var(--input-border);
+            border-radius: 8px;
+            color: var(--text-main);
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .form-control:focus {
+            border-color: var(--accent);
+        }
+
+        select.form-control {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2394a3b8'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 16px;
+            padding-right: 40px;
+        }
+
+        .equipment-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px dashed var(--card-border);
+        }
+
+        .detail-item {
+            font-size: 0.75rem;
+        }
+
+        .detail-item span {
+            display: block;
+            color: var(--text-muted);
+        }
+
+        .detail-item strong {
+            color: var(--accent);
+            font-size: 0.85rem;
+        }
+
+        .instruction-box {
+            background: rgba(234, 179, 8, 0.1);
+            border-left: 3px solid #eab308;
+            padding: 10px 12px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            color: #fef08a;
+            margin-bottom: 18px;
+            line-height: 1.4;
+        }
+
+        .radio-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 6px;
+        }
+
+        .radio-card {
+            background: var(--input-bg);
+            border: 1px solid var(--input-border);
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .radio-card input {
+            display: none;
+        }
+
+        .radio-card .label-text {
+            font-size: 0.85rem;
+            font-weight: 700;
+        }
+
+        .radio-card.alarme-option {
+            color: var(--text-muted);
+        }
+
+        .radio-card.no-alarme-option {
+            color: var(--text-muted);
+        }
+
+        .radio-card.alarme-option:has(input:checked) {
+            border-color: var(--success);
+            background: rgba(34, 197, 94, 0.15);
+            color: var(--success);
+        }
+
+        .radio-card.no-alarme-option:has(input:checked) {
+            border-color: var(--danger);
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--danger);
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 14px;
+            background-color: var(--accent);
+            color: #0f172a;
+            font-weight: 700;
+            font-size: 1rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+            margin-top: 8px;
+        }
+
+        .btn-submit:active {
+            transform: scale(0.98);
+        }
+
+        .btn-submit:disabled {
+            background-color: var(--input-border);
+            color: var(--text-muted);
+            cursor: not-allowed;
+        }
+
+        #feedbackMessage {
+            margin-top: 14px;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            text-align: center;
+            font-weight: 600;
+            display: none;
+        }
+
+        .feedback-success {
+            background: rgba(34, 197, 94, 0.2);
+            color: var(--success);
+            border: 1px solid var(--success);
+        }
+
+        .feedback-error {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--danger);
+            border: 1px solid var(--danger);
+        }
+
+        @media (max-width: 360px) {
+            .app-container {
+                padding: 14px 10px;
+            }
+            .equipment-details {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <div class="header">
+        <h1>Teste de Calibração PDM</h1>
+        <p>Inspeção Diária de Segurança da Aviação Civil</p>
+        <span class="badge-norma">ANAC • RBAC 107 / IS 107</span>
+    </div>
+
+    <form id="calibrationForm">
+        <!-- Seleção do Equipamento -->
+        <div class="pdm-selector-box">
+            <div class="form-group" style="margin-bottom: 0;">
+                <label for="pdmSelect">Selecione o Pórtico (PDM) *</label>
+                <select id="pdmSelect" class="form-control" required>
+                    <option value="PDM-01">Portaria Caminhões (DX/8S)</option>
+                    <option value="PDM-02">Portaria Principal / Funcionários (DX/8S)</option>
+                </select>
+            </div>
+
+            <div class="equipment-details">
+                <div class="detail-item">
+                    <span>Modelo</span>
+                    <strong id="dispModelo">DX/8S</strong>
+                </div>
+                <div class="detail-item">
+                    <span>Nº de Série</span>
+                    <strong id="dispSerie">LSG001PDM</strong>
+                </div>
+                <div class="detail-item" style="grid-column: span 2; margin-top: 4px;">
+                    <span>Localização</span>
+                    <strong id="dispLocal">Portaria Caminhões</strong>
+                </div>
+            </div>
+        </div>
+
+        <!-- Instruções Normativas -->
+        <div class="instruction-box">
+            <strong>Instrução Obrigatória (ANAC):</strong><br>
+            • O DT deve ser posicionado no bolso do APAC.<br>
+            • O DMM deve passar pelo menos 03 (três) vezes sobre o DT (distância de 2,5cm a 5cm).
+        </div>
+
+        <!-- Data do Teste -->
+        <div class="form-group">
+            <label for="dataTeste">Data do Teste *</label>
+            <input type="date" id="dataTeste" class="form-control" required>
+        </div>
+
+        <!-- Ajuste / Sensibilidade -->
+        <div class="form-group">
+            <label for="sensibilidade">Ajuste do PDM (Sensibilidade) *</label>
+            <input type="text" id="sensibilidade" class="form-control" placeholder="Ex: Nível 5 / A10 / Standard" required>
+        </div>
+
+        <!-- Resultado do Teste -->
+        <div class="form-group">
+            <label>Resultado do Teste *</label>
+            <div class="radio-options">
+                <label class="radio-card alarme-option">
+                    <input type="radio" name="resultado" value="ALARME" required>
+                    <span class="label-text">⚡ ALARME</span>
+                    <span style="font-size: 0.65rem;">(Conforme / Aprovado)</span>
+                </label>
+                <label class="radio-card no-alarme-option">
+                    <input type="radio" name="resultado" value="NÃO ALARME">
+                    <span class="label-text">🚫 NÃO ALARME</span>
+                    <span style="font-size: 0.65rem;">(Falha / Reprovado)</span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Observações / Ações Tomadas -->
+        <div class="form-group">
+            <label for="observacoes">Observações / Ações Tomadas</label>
+            <textarea id="observacoes" class="form-control" rows="2" placeholder="Descreva qualquer anomalia ou ajuste realizado..."></textarea>
+        </div>
+
+        <!-- Nome do APAC -->
+        <div class="form-group">
+            <label for="nomeAPAC">Nome do APAC Responsável *</label>
+            <input type="text" id="nomeAPAC" class="form-control" placeholder="Nome completo" required>
+        </div>
+
+        <!-- Assinatura / Matrícula -->
+        <div class="form-group">
+            <label for="assinatura">Assinatura Digital / Matrícula *</label>
+            <input type="text" id="assinatura" class="form-control" placeholder="Digite sua matrícula ou ID" required>
+        </div>
+
+        <button type="submit" id="btnSubmit" class="btn-submit">Registrar Calibração</button>
+    </form>
+
+    <div id="feedbackMessage"></div>
+</div>
+
+<script>
+    // Cadastro dos equipamentos cadastrados na empresa
+    const equipDatabase = {
+        "PDM-01": {
+            modelo: "DX/8S",
+            numeroSerie: "LSG001PDM",
+            localizacao: "Portaria Caminhões"
+        },
+        "PDM-02": {
+            modelo: "DX/8S",
+            numeroSerie: "LSG002PDM",
+            localizacao: "Portaria Principal"
+        }
+    };
+
+    const pdmSelect = document.getElementById('pdmSelect');
+    const dispModelo = document.getElementById('dispModelo');
+    const dispSerie = document.getElementById('dispSerie');
+    const dispLocal = document.getElementById('dispLocal');
+
+    // Atualiza os dados dinâmicos na tela ao trocar o seletor
+    function updateEquipmentDetails() {
+        const selectedKey = pdmSelect.value;
+        const equip = equipDatabase[selectedKey];
+        if (equip) {
+            dispModelo.innerText = equip.modelo;
+            dispSerie.innerText = equip.numeroSerie;
+            dispLocal.innerText = equip.localizacao;
+        }
+    }
+
+    pdmSelect.addEventListener('change', updateEquipmentDetails);
+
+    // Data atual
+    document.getElementById('dataTeste').valueAsDate = new Date();
+
+    // Envio do Formulário
+    document.getElementById('calibrationForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const btnSubmit = document.getElementById('btnSubmit');
+        const feedbackMessage = document.getElementById('feedbackMessage');
+
+        btnSubmit.disabled = true;
+        btnSubmit.innerText = "Registrando...";
+        feedbackMessage.style.display = 'none';
+
+        const selectedKey = pdmSelect.value;
+        const equip = equipDatabase[selectedKey];
+
+        const payload = {
+            pdmId: selectedKey,
+            modelo: equip.modelo,
+            numeroSerie: equip.numeroSerie,
+            localizacao: equip.localizacao,
+            dataTeste: document.getElementById('dataTeste').value,
+            sensibilidade: document.getElementById('sensibilidade').value,
+            resultado: document.querySelector('input[name="resultado"]:checked').value,
+            observacoes: document.getElementById('observacoes').value,
+            nomeAPAC: document.getElementById('nomeAPAC').value,
+            assinatura: document.getElementById('assinatura').value
+        };
+
+        try {
+            const response = await fetch('/api/gas', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            const result = await response.json();
+
+            if (result.status === 'success') {
+                feedbackMessage.className = 'feedback-success';
+                feedbackMessage.innerText = ' Calibração registrada com sucesso!';
+                document.getElementById('calibrationForm').reset();
+                document.getElementById('dataTeste').valueAsDate = new Date();
+                updateEquipmentDetails();
+            } else {
+                throw new Error(result.message || 'Erro inesperado.');
+            }
+        } catch (err) {
+            feedbackMessage.className = 'feedback-error';
+            feedbackMessage.innerText = ' Falha ao registrar: ' + err.message;
+        } finally {
+            feedbackMessage.style.display = 'block';
+            btnSubmit.disabled = false;
+            btnSubmit.innerText = "Registrar Calibração";
+        }
+    });
+
+    // Inicialização
+    updateEquipmentDetails();
+</script>
+
+</body>
+</html>
