@@ -9,10 +9,6 @@ export default async function handler(req, res) {
     return;
   }
 
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Método não permitido.' });
-  }
-
   const GAS_URL = process.env.GAS_URL;
 
   if (!GAS_URL) {
@@ -20,14 +16,22 @@ export default async function handler(req, res) {
   }
 
   try {
-    const response = await fetch(GAS_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(req.body),
-    });
+    if (req.method === 'GET') {
+      const response = await fetch(GAS_URL);
+      const data = await response.json();
+      return res.status(200).json(data);
+    } else if (req.method === 'POST') {
+      const response = await fetch(GAS_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(req.body),
+      });
 
-    const data = await response.json();
-    return res.status(200).json(data);
+      const data = await response.json();
+      return res.status(200).json(data);
+    } else {
+      return res.status(405).json({ error: 'Método não permitido.' });
+    }
   } catch (error) {
     return res.status(500).json({ error: 'Erro de conexão com o banco do Google Sheets.', details: error.message });
   }
