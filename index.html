@@ -2,9 +2,8 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SGG - PDM-DMM</title>
-    <!-- Ícone da aba do navegador -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SGG - Teste de Calibração PDM/DMM</title>
     <link rel="icon" type="image/x-icon" href="icone lsg.ico">
     <style>
         :root {
@@ -21,608 +20,360 @@
             --radius: 12px;
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            -webkit-tap-highlight-color: transparent;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-main); display: flex; flex-direction: column; min-height: 100vh; }
+        
+        .top-banner { width: 100%; background-color: #ffffff; padding: 12px 16px; display: flex; justify-content: center; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.3); margin-bottom: 20px; }
+        .top-banner img { max-height: 48px; width: auto; object-fit: contain; }
 
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-        }
-
-        /* Faixa horizontal branca no topo */
-        .top-banner {
-            width: 100%;
-            background-color: #ffffff;
-            padding: 12px 16px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-            margin-bottom: 20px;
-        }
-
-        .top-banner img {
-            max-height: 48px;
-            width: auto;
-            object-fit: contain;
-        }
-
-        .app-container {
-            width: 100%;
-            max-width: 500px;
-            background-color: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: var(--radius);
-            padding: 20px 16px;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
-            margin-bottom: 24px;
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 16px;
-            padding-bottom: 12px;
-            border-bottom: 1px solid var(--card-border);
-        }
-
-        .header h1 {
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: var(--accent);
-            text-transform: uppercase;
-            line-height: 1.3;
-        }
-
-        .header p {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            margin-top: 4px;
-        }
-
-        .pdm-selector-box {
-            background: var(--input-bg);
-            border: 2px solid var(--accent);
-            border-radius: var(--radius);
-            padding: 12px;
-            margin-bottom: 16px;
-        }
+        .main-container { width: 95%; max-width: 650px; margin: 0 auto 24px auto; flex: 1; }
+        .form-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius); padding: 20px; margin-bottom: 20px; }
+        .form-card h2 { color: var(--accent); font-size: 1.1rem; margin-bottom: 16px; border-bottom: 1px solid var(--card-border); padding-bottom: 8px; text-transform: uppercase; }
 
         .form-group { margin-bottom: 14px; }
-        .form-group label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 6px; }
-
-        .form-control {
-            width: 100%;
-            padding: 12px;
-            background-color: var(--input-bg);
-            border: 1px solid var(--input-border);
-            border-radius: 8px;
-            color: var(--text-main);
-            font-size: 0.95rem;
-            outline: none;
-        }
-
+        .form-group label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 6px; color: var(--text-muted); }
+        .form-control { width: 100%; padding: 10px; background-color: var(--input-bg); border: 1px solid var(--input-border); border-radius: 8px; color: var(--text-main); font-size: 0.9rem; outline: none; }
         .form-control:focus { border-color: var(--accent); }
 
-        select.form-control {
-            appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2394a3b8'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 12px center;
-            background-size: 16px;
-            padding-right: 40px;
-        }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
-        .equipment-details {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-            margin-top: 8px;
-            padding-top: 8px;
-            border-top: 1px dashed var(--card-border);
-            font-size: 0.75rem;
-        }
+        /* Estilo das Travessias/Testes */
+        .tests-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-top: 10px; }
+        .test-btn { padding: 12px 5px; background: var(--input-bg); border: 1px solid var(--input-border); border-radius: 8px; color: var(--text-muted); font-weight: bold; font-size: 0.8rem; cursor: pointer; text-align: center; }
+        .test-btn.ok { background: rgba(34, 197, 94, 0.2); border-color: var(--success); color: var(--success); }
+        .test-btn.not-ok { background: rgba(239, 68, 68, 0.2); border-color: var(--danger); color: var(--danger); }
 
-        .equipment-details span { color: var(--text-muted); display: block; }
-        .equipment-details strong { color: var(--accent); font-size: 0.85rem; }
+        /* Modal de Assinatura Canvas */
+        .signature-box { border: 1px dashed var(--input-border); border-radius: 8px; background: #ffffff; margin-top: 8px; width: 100%; height: 160px; touch-action: none; }
+        .sig-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 6px; }
 
-        .pass-list { display: flex; flex-direction: column; gap: 8px; margin-top: 6px; }
+        .btn-submit { width: 100%; padding: 14px; background: var(--accent); color: #0f172a; border: none; border-radius: 8px; font-weight: bold; font-size: 1rem; cursor: pointer; margin-top: 10px; }
+        .btn-clear { background: transparent; border: 1px solid var(--input-border); color: var(--text-muted); padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; cursor: pointer; }
 
-        .pass-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: var(--input-bg);
-            border: 1px solid var(--input-border);
-            border-radius: 8px;
-            padding: 8px 12px;
-        }
-
-        .pass-label { font-size: 0.85rem; font-weight: bold; }
-
-        .toggle-switch {
-            position: relative;
-            display: inline-block;
-            width: 56px;
-            height: 28px;
-        }
-
-        .toggle-switch input { opacity: 0; width: 0; height: 0; }
-
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background-color: var(--danger);
-            transition: .3s;
-            border-radius: 30px;
-        }
-
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 20px;
-            width: 20px;
-            left: 4px;
-            bottom: 4px;
-            background-color: white;
-            transition: .3s;
-            border-radius: 50%;
-        }
-
-        input:checked + .slider { background-color: var(--success); }
-        input:checked + .slider:before { transform: translateX(28px); }
-
-        /* Área de assinatura quadrada */
-        .signature-container {
-            background: #ffffff;
-            border: 2px dashed var(--input-border);
-            border-radius: 8px;
-            touch-action: none;
-            width: 100%;
-            max-width: 300px;
-            aspect-ratio: 1 / 1;
-            margin: 0 auto;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        canvas {
-            width: 100%;
-            height: 100%;
-            display: block;
-            border-radius: 6px;
-            cursor: crosshair;
-        }
-
-        .btn-clear-sig {
-            display: block;
-            margin-top: 6px;
-            background: transparent;
-            color: var(--danger);
-            border: 1px solid var(--danger);
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-size: 0.75rem;
-            font-weight: bold;
-            cursor: pointer;
-            margin-left: auto;
-        }
-
-        .status-banner {
-            padding: 12px;
-            border-radius: 8px;
-            font-size: 0.85rem;
-            font-weight: bold;
-            text-align: center;
-            margin-top: 14px;
-            margin-bottom: 16px;
-        }
-
-        .status-aprovado { background: rgba(34, 197, 94, 0.2); color: var(--success); border: 1px solid var(--success); }
-        .status-reprovado { background: rgba(239, 68, 68, 0.2); color: var(--danger); border: 1px solid var(--danger); }
-
-        .btn-submit {
-            width: 100%;
-            padding: 14px;
-            background-color: var(--accent);
-            color: #0f172a;
-            font-weight: 700;
-            font-size: 1rem;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            margin-top: 8px;
-        }
-
-        .btn-submit:disabled { background-color: var(--input-border); color: var(--text-muted); cursor: not-allowed; }
-
-        #feedbackMessage {
-            margin-top: 14px;
-            padding: 12px;
-            border-radius: 8px;
-            font-size: 0.85rem;
-            text-align: center;
-            font-weight: 600;
-            display: none;
-        }
-
-        .feedback-success { background: rgba(34, 197, 94, 0.2); color: var(--success); border: 1px solid var(--success); }
-        .feedback-error { background: rgba(239, 68, 68, 0.2); color: var(--danger); border: 1px solid var(--danger); }
-
-        /* Estilo do Rodapé */
-        .footer {
-            width: 100%;
-            text-align: center;
-            padding: 16px 20px;
-            margin-top: auto;
-            color: var(--text-muted);
-            font-size: 0.8rem;
-            font-weight: 500;
-            border-top: 1px solid var(--card-border);
-            background-color: rgba(15, 23, 42, 0.6);
-        }
+        .footer { text-align: center; padding: 16px; color: var(--text-muted); font-size: 0.8rem; border-top: 1px solid var(--card-border); background: rgba(15, 23, 42, 0.6); margin-top: auto; }
     </style>
 </head>
 <body>
 
-<!-- Faixa superior branca com Logo -->
 <div class="top-banner">
-    <img src="logo lsg.png" alt="LSG Sky Chefs Logo">
+    <img src="logo lsg.png" alt="LSG Sky Chefs">
 </div>
 
-<div class="app-container">
-    <div class="header">
-        <h1>Teste de Calibração Diário de Equipamentos Detectores de Metais</h1>
-        <p>Inspeção PDM / DMM</p>
-    </div>
-
-    <form id="calibrationForm">
-        <div class="pdm-selector-box">
-            <div class="form-group" style="margin-bottom: 0;">
-                <label for="equipSelect">Selecione o Equipamento *</label>
-                <select id="equipSelect" class="form-control" required>
+<div class="main-container">
+    <form id="calibForm">
+        <div class="form-card">
+            <h2>1. Identificação da Inspeção</h2>
+            
+            <div class="form-group">
+                <label>Selecione o Equipamento</label>
+                <select id="equipamentoId" class="form-control" required onchange="aoSelecionarEquipamento()">
                     <option value="">Carregando equipamentos...</option>
                 </select>
             </div>
 
-            <div class="equipment-details">
-                <div><span>Tipo:</span><strong id="dispTipo">-</strong></div>
-                <div><span>Modelo:</span><strong id="dispModelo">-</strong></div>
-                <div><span>Nº de Série:</span><strong id="dispSerie">-</strong></div>
-                <div><span>Localização:</span><strong id="dispLocal">-</strong></div>
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>Tipo</label>
+                    <input type="text" id="tipoEquipamento" class="form-control" readonly>
+                </div>
+                <div class="form-group">
+                    <label>Data do Teste</label>
+                    <input type="date" id="dataTeste" class="form-control" required>
+                </div>
+            </div>
+
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>Modelo / Nº Série</label>
+                    <input type="text" id="modeloSerie" class="form-control" readonly>
+                </div>
+                <div class="form-group">
+                    <label>Localização</label>
+                    <input type="text" id="localizacao" class="form-control" readonly>
+                </div>
             </div>
         </div>
 
-        <div class="form-group">
-            <label for="dataTeste">Data do Teste *</label>
-            <input type="date" id="dataTeste" class="form-control" required>
-        </div>
+        <div class="form-card">
+            <h2>2. Parâmetros & Dispositivos (DT)</h2>
 
-        <!-- Campos PDM Específicos -->
-        <div id="groupPdmOnly">
             <div class="form-group">
-                <label for="nivelAmeaca">Nível de Ameaça Vigente *</label>
-                <select id="nivelAmeaca" class="form-control">
-                    <option value="NORMAL">NORMAL (Utiliza DT 01 e DT 02)</option>
-                    <option value="ELEVADO">ELEVADO - Âmbar/Vermelho (Utiliza DT 03 e DT 04)</option>
+                <label>Nível de Ameaça</label>
+                <select id="nivelAmeaca" class="form-control" onchange="atualizarOpcoesDT()" required>
+                    <option value="NORMAL">NORMAL</option>
+                    <option value="ELEVADO">ELEVADO</option>
                 </select>
             </div>
 
             <div class="form-group">
-                <label for="dispositivoDT">Dispositivo de Teste (DT) *</label>
-                <select id="dispositivoDT" class="form-control"></select>
+                <label>Dispositivo Teste (DT)</label>
+                <select id="dispositivoDT" class="form-control" required>
+                    <option value="">Selecione o equipamento e nível de ameaça...</option>
+                </select>
+            </div>
+
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>Sensibilidade Ajustada (%)</label>
+                    <input type="number" id="sensibilidade" class="form-control" placeholder="Ex: 85" min="0" max="100">
+                </div>
+                <div class="form-group">
+                    <label>Resultado do Teste</label>
+                    <input type="text" id="resultado" class="form-control" readonly placeholder="Aguardando testes...">
+                </div>
+            </div>
+        </div>
+
+        <div class="form-card">
+            <h2>3. Testes de Detecção / Travessias</h2>
+            <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:10px;">Toque no botão para alternar entre OK e NÃO OK:</p>
+            
+            <div class="tests-grid" id="testsGrid">
+                <!-- Botões de travessia dinâmicos -->
+            </div>
+        </div>
+
+        <div class="form-card">
+            <h2>4. Responsável e Assinatura</h2>
+
+            <div class="form-group">
+                <label>Nome do APAC Responsável</label>
+                <select id="nomeAPAC" class="form-control" required>
+                    <option value="">Carregando APACs...</option>
+                </select>
             </div>
 
             <div class="form-group">
-                <label for="sensibilidade">Sensibilidade Atual *</label>
-                <input type="text" id="sensibilidade" class="form-control" placeholder="Ex: Nível 5 / A10">
+                <label>Observações / Ações Tomadas</label>
+                <textarea id="observacoes" class="form-control" rows="3" placeholder="Insira observações caso haja não conformidade..."></textarea>
             </div>
-        </div>
 
-        <div class="form-group">
-            <label id="lblTravessias">Testes de Passagem *</label>
-            <div id="passList" class="pass-list"></div>
-        </div>
-
-        <div id="statusBanner" class="status-banner status-aprovado">
-            ✓ APROVADO
-        </div>
-
-        <div class="form-group">
-            <label for="observacoes">Observações / Ações Tomadas</label>
-            <textarea id="observacoes" class="form-control" rows="2" placeholder="Descreva ajustes ou motivo da reprovação..."></textarea>
-        </div>
-
-        <div class="form-group">
-            <label for="nomeAPAC">Nome do APAC Responsável *</label>
-            <select id="nomeAPAC" class="form-control" required>
-                <option value="">Carregando APACs...</option>
-            </select>
-        </div>
-
-        <div class="form-group">
-            <label>Assinatura Digital do APAC Responsável *</label>
-            <div class="signature-container">
-                <canvas id="signatureCanvas"></canvas>
+            <div class="form-group">
+                <label>Assinatura Digital do APAC</label>
+                <canvas id="sigCanvas" class="signature-box"></canvas>
+                <div class="sig-actions">
+                    <button type="button" class="btn-clear" onclick="limparAssinatura()">Limpar Assinatura</button>
+                </div>
             </div>
-            <button type="button" class="btn-clear-sig" id="btnClearSig">Limpar Assinatura</button>
-        </div>
 
-        <button type="submit" id="btnSubmit" class="btn-submit">Salvar Registro</button>
+            <button type="submit" class="btn-submit" id="btnSalvar">Salvar Registro de Calibração</button>
+        </div>
     </form>
-
-    <div id="feedbackMessage"></div>
 </div>
 
-<!-- Rodapé -->
 <footer class="footer">
     Caterair Serviços de Bordo e Hotelaria LTDA - Base GIG
 </footer>
 
 <script>
-    let equipDatabase = {};
+    let dadosEquipamentos = {};
+    let estadoTravessias = [true, true, true, true, true]; // Default 5 travessias OK
+    let canvas, ctx, desenhando = false;
 
-    const equipSelect = document.getElementById('equipSelect');
-    const nivelAmeacaSelect = document.getElementById('nivelAmeaca');
-    const dispositivoDTSelect = document.getElementById('dispositivoDT');
-    const statusBanner = document.getElementById('statusBanner');
-    const observacoesInput = document.getElementById('observacoes');
-    const nomeAPACSelect = document.getElementById('nomeAPAC');
-    const groupPdmOnly = document.getElementById('groupPdmOnly');
-    const passList = document.getElementById('passList');
-
-    async function initData() {
-        try {
-            const response = await fetch('/api/gas');
-            const data = await response.json();
-            
-            if (data.status === 'success') {
-                nomeAPACSelect.innerHTML = '<option value="">Selecione seu nome...</option>';
-                data.apacs.forEach(apac => {
-                    const opt = document.createElement('option');
-                    opt.value = apac;
-                    opt.innerText = apac;
-                    nomeAPACSelect.appendChild(opt);
-                });
-
-                equipDatabase = data.equipamentos || {};
-                equipSelect.innerHTML = '<option value="">Selecione o equipamento...</option>';
-                Object.keys(equipDatabase).forEach(key => {
-                    const eq = equipDatabase[key];
-                    const opt = document.createElement('option');
-                    opt.value = key;
-                    opt.innerText = `${key} - ${eq.localizacao} (${eq.tipo})`;
-                    equipSelect.appendChild(opt);
-                });
-            }
-        } catch (err) {
-            console.error(err);
-            nomeAPACSelect.innerHTML = '<option value="">Erro ao carregar dados</option>';
-        }
-    }
-
-    function buildTestItems(count) {
-        passList.innerHTML = '';
-        for(let i = 1; i <= count; i++) {
-            const item = document.createElement('div');
-            item.className = 'pass-item';
-            item.innerHTML = `
-                <span class="pass-label">${i}º Teste</span>
-                <label class="toggle-switch">
-                    <input type="checkbox" class="pass-check" checked>
-                    <span class="slider"></span>
-                </label>
-            `;
-            passList.appendChild(item);
-        }
+    // Inicialização da Data e Canvas
+    window.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('dataTeste').valueToDate = new Date();
+        document.getElementById('dataTeste').value = new Date().toISOString().split('T')[0];
         
-        document.querySelectorAll('.pass-check').forEach(c => {
-            c.addEventListener('change', calculateResults);
-        });
-    }
-
-    function updateEquipmentUI() {
-        const selectedKey = equipSelect.value;
-        const selected = equipDatabase[selectedKey];
-
-        if (!selected) {
-            document.getElementById('dispTipo').innerText = '-';
-            document.getElementById('dispModelo').innerText = '-';
-            document.getElementById('dispSerie').innerText = '-';
-            document.getElementById('dispLocal').innerText = '-';
-            return;
-        }
-
-        document.getElementById('dispTipo').innerText = selected.tipo;
-        document.getElementById('dispModelo').innerText = selected.modelo;
-        document.getElementById('dispSerie').innerText = selected.numeroSerie;
-        document.getElementById('dispLocal').innerText = selected.localizacao;
-
-        if (selected.tipo === 'DMM') {
-            groupPdmOnly.style.display = 'none';
-            document.getElementById('nivelAmeaca').required = false;
-            document.getElementById('sensibilidade').required = false;
-            buildTestItems(3);
-        } else {
-            groupPdmOnly.style.display = 'block';
-            document.getElementById('nivelAmeaca').required = true;
-            document.getElementById('sensibilidade').required = true;
-            updateDTOptions();
-            buildTestItems(5);
-        }
-
-        calculateResults();
-    }
-
-    function updateDTOptions() {
-        dispositivoDTSelect.innerHTML = '';
-        if (nivelAmeacaSelect.value === 'NORMAL') {
-            dispositivoDTSelect.innerHTML += '<option value="DT 01 (Ferroso 178g)">DT 01 (Ferroso Magnetizável - 178g)</option>';
-            dispositivoDTSelect.innerHTML += '<option value="DT 02 (Não Magnético 240g)">DT 02 (Ferroso Não Magnético - 240g)</option>';
-        } else {
-            dispositivoDTSelect.innerHTML += '<option value="DT 03 (104g)">DT 03 (104g)</option>';
-            dispositivoDTSelect.innerHTML += '<option value="DT 04 (120g)">DT 04 (120g)</option>';
-        }
-    }
-
-    function calculateResults() {
-        const selectedKey = equipSelect.value;
-        const selected = equipDatabase[selectedKey];
-        const checks = document.querySelectorAll('.pass-check');
-        
-        let okCount = 0;
-        checks.forEach(c => { if (c.checked) okCount++; });
-
-        const totalTests = checks.length;
-        if (totalTests === 0) return 0;
-
-        let isApproved = false;
-
-        if (selected && selected.tipo === 'DMM') {
-            isApproved = (okCount === 3);
-        } else {
-            isApproved = (okCount >= 4);
-        }
-
-        if (isApproved) {
-            statusBanner.className = "status-banner status-aprovado";
-            statusBanner.innerHTML = `✓ EQUIPAMENTO CONFORME (${okCount}/${totalTests} Alarmes)`;
-            observacoesInput.required = false;
-        } else {
-            statusBanner.className = "status-banner status-reprovado";
-            statusBanner.innerHTML = `⚠ NÃO CONFORME (${okCount}/${totalTests} Alarmes)<br><span style="font-size:0.75rem; font-weight:normal;">Forneça uma justificativa nas observações.</span>`;
-            observacoesInput.required = true;
-        }
-
-        return okCount;
-    }
-
-    equipSelect.addEventListener('change', updateEquipmentUI);
-    nivelAmeacaSelect.addEventListener('change', () => { updateDTOptions(); calculateResults(); });
-    dispositivoDTSelect.addEventListener('change', calculateResults);
-
-    // Canvas da Assinatura (Ajustado para proporção quadrada)
-    const canvas = document.getElementById('signatureCanvas');
-    const ctx = canvas.getContext('2d');
-    let isDrawing = false;
-    let hasSignature = false;
-
-    function resizeCanvas() {
-        const rect = canvas.getBoundingClientRect();
-        canvas.width = rect.width;
-        canvas.height = rect.height;
-        ctx.lineWidth = 2;
-        ctx.lineCap = 'round';
-        ctx.strokeStyle = '#0f172a';
-    }
-
-    window.addEventListener('resize', resizeCanvas);
-    setTimeout(resizeCanvas, 200);
-
-    function getPos(e) {
-        const rect = canvas.getBoundingClientRect();
-        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-        return { x: clientX - rect.left, y: clientY - rect.top };
-    }
-
-    function startDrawing(e) { isDrawing = true; hasSignature = true; const pos = getPos(e); ctx.beginPath(); ctx.moveTo(pos.x, pos.y); }
-    function draw(e) { if (!isDrawing) return; const pos = getPos(e); ctx.lineTo(pos.x, pos.y); ctx.stroke(); }
-    function stopDrawing() { isDrawing = false; }
-
-    canvas.addEventListener('mousedown', startDrawing);
-    canvas.addEventListener('mousemove', draw);
-    canvas.addEventListener('mouseup', stopDrawing);
-    canvas.addEventListener('touchstart', (e) => { e.preventDefault(); startDrawing(e); });
-    canvas.addEventListener('touchmove', (e) => { e.preventDefault(); draw(e); });
-    canvas.addEventListener('touchend', stopDrawing);
-
-    document.getElementById('btnClearSig').addEventListener('click', () => {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        hasSignature = false;
+        initCanvas();
+        carregarOpcoesIniciais();
+        renderizarBotoesTravessia();
     });
 
-    document.getElementById('dataTeste').valueAsDate = new Date();
+    async function carregarOpcoesIniciais() {
+        try {
+            const resp = await fetch('/api/gas');
+            const data = await resp.json();
 
-    document.getElementById('calibrationForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
+            if (data.status === 'success') {
+                // Preenche Select de Equipamentos
+                dadosEquipamentos = data.equipamentos || {};
+                const selectEquip = document.getElementById('equipamentoId');
+                selectEquip.innerHTML = '<option value="">Selecione...</option>';
+                
+                Object.keys(dadosEquipamentos).forEach(id => {
+                    selectEquip.innerHTML += `<option value="${id}">${id}</option>`;
+                });
 
-        const btnSubmit = document.getElementById('btnSubmit');
-        const feedbackMessage = document.getElementById('feedbackMessage');
-        const selected = equipDatabase[equipSelect.value];
-
-        if (!hasSignature) {
-            alert("Por favor, forneça a assinatura digital do APAC.");
-            return;
+                // Preenche Select de APACs
+                const selectApac = document.getElementById('nomeAPAC');
+                selectApac.innerHTML = '<option value="">Selecione o APAC...</option>';
+                (data.apacs || []).forEach(nome => {
+                    selectApac.innerHTML += `<option value="${nome}">${nome}</option>`;
+                });
+            }
+        } catch (e) {
+            alert("Erro ao carregar dados do servidor Google Apps Script.");
         }
+    }
 
-        btnSubmit.disabled = true;
-        btnSubmit.innerText = "Salvando registro...";
-        feedbackMessage.style.display = 'none';
+    function aoSelecionarEquipamento() {
+        const id = document.getElementById('equipamentoId').value;
+        const equip = dadosEquipamentos[id];
 
-        const checks = document.querySelectorAll('.pass-check');
-        const okCount = calculateResults();
-        const totalTests = checks.length;
-        const travessiasState = Array.from(checks).map(c => c.checked);
+        if (equip) {
+            document.getElementById('tipoEquipamento').value = equip.tipo;
+            document.getElementById('modeloSerie').value = `${equip.modelo} / ${equip.numeroSerie}`;
+            document.getElementById('localizacao').value = equip.localizacao;
+            
+            // Ajusta o número de travessias default (5 para PDM/DMM)
+            estadoTravessias = [true, true, true, true, true];
+            renderizarBotoesTravessia();
+            atualizarOpcoesDT();
+        } else {
+            document.getElementById('tipoEquipamento').value = '';
+            document.getElementById('modeloSerie').value = '';
+            document.getElementById('localizacao').value = '';
+            document.getElementById('dispositivoDT').innerHTML = '<option value="">Selecione o equipamento...</option>';
+        }
+    }
 
-        const payload = {
-            equipamentoId: equipSelect.value,
-            tipoEquipamento: selected.tipo,
-            modelo: selected.modelo,
-            numeroSerie: selected.numeroSerie,
-            localizacao: selected.localizacao,
-            dataTeste: document.getElementById('dataTeste').value,
-            nivelAmeaca: selected.tipo === 'PDM' ? nivelAmeacaSelect.value : 'N/A',
-            dispositivoDT: selected.tipo === 'PDM' ? dispositivoDTSelect.value : 'N/A',
-            sensibilidade: selected.tipo === 'PDM' ? document.getElementById('sensibilidade').value : 'N/A',
-            travessias: travessiasState,
-            alarmesObtidos: `${okCount}/${totalTests}`,
-            resultado: statusBanner.classList.contains('status-aprovado') ? 'CONFORME' : 'NÃO CONFORME',
-            observacoes: document.getElementById('observacoes').value,
-            nomeAPAC: nomeAPACSelect.value,
-            assinaturaBase64: canvas.toDataURL("image/png")
+    // REGRA ATUALIZADA: PDM e DMM agora utilizam os mesmos DTs 01, 02, 03 e 04
+    function atualizarOpcoesDT() {
+        const tipo = document.getElementById('tipoEquipamento').value;
+        const ameaca = document.getElementById('nivelAmeaca').value;
+        const dtSelect = document.getElementById('dispositivoDT');
+
+        dtSelect.innerHTML = '';
+
+        if (tipo === 'PDM' || tipo === 'DMM') {
+            if (ameaca === 'NORMAL') {
+                dtSelect.innerHTML = `
+                    <option value="DT 01 (Ferroso 178g)">DT 01 (Ferroso 178g)</option>
+                    <option value="DT 02 (Não Magnético 240g)">DT 02 (Não Magnético 240g)</option>
+                `;
+            } else if (ameaca === 'ELEVADO') {
+                dtSelect.innerHTML = `
+                    <option value="DT 03 (Ferroso Reduzido)">DT 03 (Ferroso Reduzido)</option>
+                    <option value="DT 04 (Não Magnético Reduzido)">DT 04 (Não Magnético Reduzido)</option>
+                `;
+            }
+        } else {
+            dtSelect.innerHTML = '<option value="N/A">N/A - Equipamento Não Requer DT</option>';
+        }
+    }
+
+    function renderizarBotoesTravessia() {
+        const grid = document.getElementById('testsGrid');
+        grid.innerHTML = '';
+        
+        estadoTravessias.forEach((isOk, idx) => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = `test-btn ${isOk ? 'ok' : 'not-ok'}`;
+            btn.innerText = `T${idx + 1}: ${isOk ? 'OK' : 'NÃO OK'}`;
+            btn.onclick = () => {
+                estadoTravessias[idx] = !estadoTravessias[idx];
+                renderizarBotoesTravessia();
+            };
+            grid.appendChild(btn);
+        });
+
+        calcularResultado();
+    }
+
+    function calcularResultado() {
+        const okCount = estadoTravessias.filter(x => x).length;
+        const total = estadoTravessias.length;
+        const resInput = document.getElementById('resultado');
+
+        if (okCount === total) {
+            resInput.value = "CONFORME";
+            resInput.style.color = "var(--success)";
+        } else {
+            resInput.value = "NÃO CONFORME";
+            resInput.style.color = "var(--danger)";
+        }
+    }
+
+    // Lógica do Canvas (Assinatura)
+    function initCanvas() {
+        canvas = document.getElementById('sigCanvas');
+        ctx = canvas.getContext('2d');
+        
+        // Ajusta resolução do canvas
+        canvas.width = canvas.offsetWidth;
+        canvas.height = canvas.offsetHeight;
+        
+        ctx.strokeStyle = "#0f172a";
+        ctx.lineWidth = 2;
+
+        const getPos = (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            return { x: clientX - rect.left, y: clientY - rect.top };
         };
 
+        const startDraw = (e) => { desenhando = true; const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); };
+        const moveDraw = (e) => { if (!desenhando) return; const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); };
+        const stopDraw = () => { desenhando = false; };
+
+        canvas.addEventListener('mousedown', startDraw);
+        canvas.addEventListener('mousemove', moveDraw);
+        canvas.addEventListener('mouseup', stopDraw);
+
+        canvas.addEventListener('touchstart', startDraw);
+        canvas.addEventListener('touchmove', moveDraw);
+        canvas.addEventListener('touchend', stopDraw);
+    }
+
+    function limparAssinatura() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    // Envio do Formulário
+    document.getElementById('calibForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const idEquip = document.getElementById('equipamentoId').value;
+        const equip = dadosEquipamentos[idEquip] || {};
+        const okCount = estadoTravessias.filter(x => x).length;
+
+        const payload = {
+            equipamentoId: idEquip,
+            tipoEquipamento: document.getElementById('tipoEquipamento').value,
+            modelo: equip.modelo || '',
+            numeroSerie: equip.numeroSerie || '',
+            localizacao: document.getElementById('localizacao').value,
+            dataTeste: document.getElementById('dataTeste').value,
+            nivelAmeaca: document.getElementById('nivelAmeaca').value,
+            dispositivoDT: document.getElementById('dispositivoDT').value,
+            sensibilidade: document.getElementById('sensibilidade').value ? `${document.getElementById('sensibilidade').value}%` : 'N/A',
+            travessias: estadoTravessias,
+            alarmesObtidos: `${okCount}/${estadoTravessias.length}`,
+            resultado: document.getElementById('resultado').value,
+            observacoes: document.getElementById('observacoes').value,
+            nomeAPAC: document.getElementById('nomeAPAC').value,
+            assinaturaBase64: canvas.toDataURL()
+        };
+
+        const btn = document.getElementById('btnSalvar');
+        btn.disabled = true;
+        btn.innerText = "Salvando...";
+
         try {
-            const response = await fetch('/api/gas', {
+            const resp = await fetch('/api/gas', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             });
+            const res = await resp.json();
 
-            const result = await response.json();
-
-            if (result.status === 'success') {
-                feedbackMessage.className = 'feedback-message feedback-success';
-                feedbackMessage.innerText = 'Registro do teste salvo com sucesso!';
-                
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                hasSignature = false;
-                updateEquipmentUI();
+            if (res.status === 'success') {
+                alert("Teste de Calibração gravado com sucesso!");
+                location.reload();
             } else {
-                throw new Error(result.message || 'Erro ao salvar.');
+                alert("Erro ao gravar teste: " + res.message);
+                btn.disabled = false;
+                btn.innerText = "Salvar Registro de Calibração";
             }
         } catch (err) {
-            feedbackMessage.className = 'feedback-message feedback-error';
-            feedbackMessage.innerText = 'Falha ao registrar: ' + err.message;
-        } finally {
-            feedbackMessage.style.display = 'block';
-            btnSubmit.disabled = false;
-            btnSubmit.innerText = "Salvar Registro";
+            alert("Erro na conexão com o servidor.");
+            btn.disabled = false;
+            btn.innerText = "Salvar Registro de Calibração";
         }
     });
-
-    initData();
 </script>
 </body>
 </html>
