@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SGG - Teste Individual de DT</title>
+    <title>SGG - Teste de Equipamentos</title>
     <style>
         :root {
             --bg-color: #0f172a;
@@ -227,93 +227,76 @@
             font-weight: 600;
             display: none;
         }
+
+        .feedback-success { background: rgba(34, 197, 94, 0.2); color: var(--success); border: 1px solid var(--success); }
+        .feedback-error { background: rgba(239, 68, 68, 0.2); color: var(--danger); border: 1px solid var(--danger); }
     </style>
 </head>
 <body>
 
 <div class="app-container">
     <div class="header">
-        <h1>Calibração Diária PDM</h1>
-        <p>Teste por Dispositivo (DT)</p>
+        <h1>Calibração Diária de Equipamentos</h1>
+        <p>Inspeção PDM / DMM</p>
     </div>
 
     <form id="calibrationForm">
-        <!-- Equipamento -->
         <div class="pdm-selector-box">
             <div class="form-group" style="margin-bottom: 0;">
-                <label for="pdmSelect">Equipamento PDM *</label>
-                <select id="pdmSelect" class="form-control" required>
-                    <option value="PDM-01">PDM 01 - Portaria Caminhões</option>
-                    <option value="PDM-02">PDM 02 - Portaria Principal</option>
+                <label for="equipSelect">Selecione o Equipamento *</label>
+                <select id="equipSelect" class="form-control" required>
+                    <option value="">Carregando equipamentos...</option>
                 </select>
             </div>
 
             <div class="equipment-details">
-                <div><span>Modelo:</span><strong id="dispModelo">DX/8S</strong></div>
-                <div><span>Nº de Série:</span><strong id="dispSerie">LSG001PDM</strong></div>
-                <div style="grid-column: span 2; margin-top: 4px;"><span>Localização:</span><strong id="dispLocal">Portaria Caminhões</strong></div>
+                <div><span>Tipo:</span><strong id="dispTipo">-</strong></div>
+                <div><span>Modelo:</span><strong id="dispModelo">-</strong></div>
+                <div><span>Nº de Série:</span><strong id="dispSerie">-</strong></div>
+                <div><span>Localização:</span><strong id="dispLocal">-</strong></div>
             </div>
         </div>
 
-        <!-- Data do Teste -->
         <div class="form-group">
             <label for="dataTeste">Data do Teste *</label>
             <input type="date" id="dataTeste" class="form-control" required>
         </div>
 
-        <!-- Nível de Ameaça -->
-        <div class="form-group">
-            <label for="nivelAmeaca">Nível de Ameaça Vigente *</label>
-            <select id="nivelAmeaca" class="form-control" required>
-                <option value="NORMAL">NORMAL (Utiliza DT 01 e DT 02)</option>
-                <option value="ELEVADO">ELEVADO - Âmbar/Vermelho (Utiliza DT 03 e DT 04)</option>
-            </select>
-        </div>
+        <!-- Campos PDM Específicos -->
+        <div id="groupPdmOnly">
+            <div class="form-group">
+                <label for="nivelAmeaca">Nível de Ameaça Vigente *</label>
+                <select id="nivelAmeaca" class="form-control">
+                    <option value="NORMAL">NORMAL (Utiliza DT 01 e DT 02)</option>
+                    <option value="ELEVADO">ELEVADO - Âmbar/Vermelho (Utiliza DT 03 e DT 04)</option>
+                </select>
+            </div>
 
-        <!-- Seleção do DT do Teste Atual -->
-        <div class="form-group">
-            <label for="dispositivoDT">Dispositivo de Teste (DT) a ser Testado *</label>
-            <select id="dispositivoDT" class="form-control" required></select>
-        </div>
+            <div class="form-group">
+                <label for="dispositivoDT">Dispositivo de Teste (DT) *</label>
+                <select id="dispositivoDT" class="form-control"></select>
+            </div>
 
-        <!-- Sensibilidade -->
-        <div class="form-group">
-            <label for="sensibilidade"> Sensibilidade Atual do PDM *</label>
-            <input type="text" id="sensibilidade" class="form-control" placeholder="Ex: Nível 5 / A10" required>
-        </div>
-
-        <!-- 5 Travessias -->
-        <div class="form-group">
-            <label id="lblTravessias">5 Travessias com o Dispositivo *</label>
-            <div class="pass-list">
-                <script>
-                    for(let i=1; i<=5; i++) {
-                        document.write(`
-                            <div class="pass-item">
-                                <span class="pass-label">${i}ª Travessia</span>
-                                <label class="toggle-switch">
-                                    <input type="checkbox" class="pass-check" checked>
-                                    <span class="slider"></span>
-                                </label>
-                            </div>
-                        `);
-                    }
-                </script>
+            <div class="form-group">
+                <label for="sensibilidade">Sensibilidade Atual *</label>
+                <input type="text" id="sensibilidade" class="form-control" placeholder="Ex: Nível 5 / A10">
             </div>
         </div>
 
-        <!-- Status Banner -->
-        <div id="statusBanner" class="status-banner status-aprovado">
-            ✓ DT APROVADO (5/5 Alarmes)
+        <div class="form-group">
+            <label id="lblTravessias">Testes de Passagem *</label>
+            <div id="passList" class="pass-list"></div>
         </div>
 
-        <!-- Observações -->
+        <div id="statusBanner" class="status-banner status-aprovado">
+            ✓ APROVADO
+        </div>
+
         <div class="form-group">
             <label for="observacoes">Observações / Ações Tomadas</label>
             <textarea id="observacoes" class="form-control" rows="2" placeholder="Descreva ajustes ou motivo da reprovação..."></textarea>
         </div>
 
-        <!-- Dropdown APAC -->
         <div class="form-group">
             <label for="nomeAPAC">Nome do APAC Responsável *</label>
             <select id="nomeAPAC" class="form-control" required>
@@ -321,7 +304,6 @@
             </select>
         </div>
 
-        <!-- Assinatura Canvas -->
         <div class="form-group">
             <label>Assinatura Digital do APAC Responsável *</label>
             <div class="signature-container">
@@ -330,31 +312,32 @@
             <button type="button" class="btn-clear-sig" id="btnClearSig">Limpar Assinatura</button>
         </div>
 
-        <button type="submit" id="btnSubmit" class="btn-submit">Salvar Teste deste DT</button>
+        <button type="submit" id="btnSubmit" class="btn-submit">Salvar Registro</button>
     </form>
 
     <div id="feedbackMessage"></div>
 </div>
 
 <script>
-    const equipDatabase = {
-        "PDM-01": { modelo: "DX/8S", numeroSerie: "LSG001PDM", localizacao: "Portaria Caminhões" },
-        "PDM-02": { modelo: "DX/8S", numeroSerie: "LSG002PDM", localizacao: "Portaria Principal" }
-    };
+    let equipDatabase = {};
 
-    const pdmSelect = document.getElementById('pdmSelect');
+    const equipSelect = document.getElementById('equipSelect');
     const nivelAmeacaSelect = document.getElementById('nivelAmeaca');
     const dispositivoDTSelect = document.getElementById('dispositivoDT');
     const statusBanner = document.getElementById('statusBanner');
     const observacoesInput = document.getElementById('observacoes');
     const nomeAPACSelect = document.getElementById('nomeAPAC');
-    const passChecks = document.querySelectorAll('.pass-check');
+    const groupPdmOnly = document.getElementById('groupPdmOnly');
+    const passList = document.getElementById('passList');
 
-    async function loadAPACs() {
+    // Carrega APACs e Equipamentos do backend
+    async function initData() {
         try {
             const response = await fetch('/api/gas');
             const data = await response.json();
-            if (data.status === 'success' && data.apacs.length > 0) {
+            
+            if (data.status === 'success') {
+                // Preenche APACs
                 nomeAPACSelect.innerHTML = '<option value="">Selecione seu nome...</option>';
                 data.apacs.forEach(apac => {
                     const opt = document.createElement('option');
@@ -362,21 +345,75 @@
                     opt.innerText = apac;
                     nomeAPACSelect.appendChild(opt);
                 });
-            } else {
-                nomeAPACSelect.innerHTML = '<option value="">Nenhum APAC cadastrado</option>';
+
+                // Armazena e preenche Equipamentos
+                equipDatabase = data.equipamentos || {};
+                equipSelect.innerHTML = '<option value="">Selecione o equipamento...</option>';
+                Object.keys(equipDatabase).forEach(key => {
+                    const eq = equipDatabase[key];
+                    const opt = document.createElement('option');
+                    opt.value = key;
+                    opt.innerText = `${key} - ${eq.localizacao} (${eq.tipo})`;
+                    equipSelect.appendChild(opt);
+                });
             }
         } catch (err) {
-            nomeAPACSelect.innerHTML = '<option value="">Erro ao carregar APACs</option>';
+            console.error(err);
+            nomeAPACSelect.innerHTML = '<option value="">Erro ao carregar dados</option>';
         }
     }
 
-    function updateEquipmentDetails() {
-        const selected = equipDatabase[pdmSelect.value];
-        if (selected) {
-            document.getElementById('dispModelo').innerText = selected.modelo;
-            document.getElementById('dispSerie').innerText = selected.numeroSerie;
-            document.getElementById('dispLocal').innerText = selected.localizacao;
+    function buildTestItems(count) {
+        passList.innerHTML = '';
+        for(let i = 1; i <= count; i++) {
+            const item = document.createElement('div');
+            item.className = 'pass-item';
+            item.innerHTML = `
+                <span class="pass-label">${i}º Teste</span>
+                <label class="toggle-switch">
+                    <input type="checkbox" class="pass-check" checked>
+                    <span class="slider"></span>
+                </label>
+            `;
+            passList.appendChild(item);
         }
+        
+        document.querySelectorAll('.pass-check').forEach(c => {
+            c.addEventListener('change', calculateResults);
+        });
+    }
+
+    function updateEquipmentUI() {
+        const selectedKey = equipSelect.value;
+        const selected = equipDatabase[selectedKey];
+
+        if (!selected) {
+            document.getElementById('dispTipo').innerText = '-';
+            document.getElementById('dispModelo').innerText = '-';
+            document.getElementById('dispSerie').innerText = '-';
+            document.getElementById('dispLocal').innerText = '-';
+            return;
+        }
+
+        document.getElementById('dispTipo').innerText = selected.tipo;
+        document.getElementById('dispModelo').innerText = selected.modelo;
+        document.getElementById('dispSerie').innerText = selected.numeroSerie;
+        document.getElementById('dispLocal').innerText = selected.localizacao;
+
+        if (selected.tipo === 'DMM') {
+            groupPdmOnly.style.display = 'none';
+            document.getElementById('nivelAmeaca').required = false;
+            document.getElementById('sensibilidade').required = false;
+            buildTestItems(3);
+        } else {
+            groupPdmOnly.style.display = 'block';
+            document.getElementById('nivelAmeaca').required = true;
+            document.getElementById('sensibilidade').required = true;
+            updateDTOptions();
+            buildTestItems(5);
+        }
+
+        calculateResults();
     }
 
     function updateDTOptions() {
@@ -388,33 +425,47 @@
             dispositivoDTSelect.innerHTML += '<option value="DT 03 (104g)">DT 03 (104g)</option>';
             dispositivoDTSelect.innerHTML += '<option value="DT 04 (120g)">DT 04 (120g)</option>';
         }
-        calculateResults();
     }
 
     function calculateResults() {
+        const selectedKey = equipSelect.value;
+        const selected = equipDatabase[selectedKey];
+        const checks = document.querySelectorAll('.pass-check');
+        
         let okCount = 0;
-        passChecks.forEach(c => { if (c.checked) okCount++; });
+        checks.forEach(c => { if (c.checked) okCount++; });
 
-        const selectedDT = dispositivoDTSelect.value;
+        const totalTests = checks.length;
+        if (totalTests === 0) return 0;
 
-        if (okCount >= 4) {
+        let isApproved = false;
+
+        if (selected && selected.tipo === 'DMM') {
+            // Regra DMM: Todos os 3 precisam dar OK
+            isApproved = (okCount === 3);
+        } else {
+            // Regra PDM: Pelo menos 4 de 5 precisam dar OK
+            isApproved = (okCount >= 4);
+        }
+
+        if (isApproved) {
             statusBanner.className = "status-banner status-aprovado";
-            statusBanner.innerHTML = `✓ ${selectedDT}: APROVADO (${okCount}/5 Alarmes)`;
+            statusBanner.innerHTML = `✓ EQUIPAMENTO CONFORME (${okCount}/${totalTests} Alarmes)`;
             observacoesInput.required = false;
         } else {
             statusBanner.className = "status-banner status-reprovado";
-            statusBanner.innerHTML = `⚠ ${selectedDT}: NÃO CONFORME (${okCount}/5 Alarmes)<br><span style="font-size:0.75rem; font-weight:normal;">Ajuste a sensibilidade e repita o teste deste DT.</span>`;
+            statusBanner.innerHTML = `⚠ NÃO CONFORME (${okCount}/${totalTests} Alarmes)<br><span style="font-size:0.75rem; font-weight:normal;">Forneça uma justificativa nas observações.</span>`;
             observacoesInput.required = true;
         }
+
         return okCount;
     }
 
-    passChecks.forEach(c => c.addEventListener('change', calculateResults));
-    pdmSelect.addEventListener('change', updateEquipmentDetails);
-    nivelAmeacaSelect.addEventListener('change', updateDTOptions);
+    equipSelect.addEventListener('change', updateEquipmentUI);
+    nivelAmeacaSelect.addEventListener('change', () => { updateDTOptions(); calculateResults(); });
     dispositivoDTSelect.addEventListener('change', calculateResults);
 
-    // Canvas Assinatura
+    // Canvas da Assinatura
     const canvas = document.getElementById('signatureCanvas');
     const ctx = canvas.getContext('2d');
     let isDrawing = false;
@@ -439,27 +490,13 @@
         return { x: clientX - rect.left, y: clientY - rect.top };
     }
 
-    function startDrawing(e) {
-        isDrawing = true;
-        hasSignature = true;
-        const pos = getPos(e);
-        ctx.beginPath();
-        ctx.moveTo(pos.x, pos.y);
-    }
-
-    function draw(e) {
-        if (!isDrawing) return;
-        const pos = getPos(e);
-        ctx.lineTo(pos.x, pos.y);
-        ctx.stroke();
-    }
-
+    function startDrawing(e) { isDrawing = true; hasSignature = true; const pos = getPos(e); ctx.beginPath(); ctx.moveTo(pos.x, pos.y); }
+    function draw(e) { if (!isDrawing) return; const pos = getPos(e); ctx.lineTo(pos.x, pos.y); ctx.stroke(); }
     function stopDrawing() { isDrawing = false; }
 
     canvas.addEventListener('mousedown', startDrawing);
     canvas.addEventListener('mousemove', draw);
     canvas.addEventListener('mouseup', stopDrawing);
-
     canvas.addEventListener('touchstart', (e) => { e.preventDefault(); startDrawing(e); });
     canvas.addEventListener('touchmove', (e) => { e.preventDefault(); draw(e); });
     canvas.addEventListener('touchend', stopDrawing);
@@ -471,38 +508,40 @@
 
     document.getElementById('dataTeste').valueAsDate = new Date();
 
-    // Envio do Formulário
     document.getElementById('calibrationForm').addEventListener('submit', async (e) => {
         e.preventDefault();
 
         const btnSubmit = document.getElementById('btnSubmit');
         const feedbackMessage = document.getElementById('feedbackMessage');
+        const selected = equipDatabase[equipSelect.value];
 
         if (!hasSignature) {
-            alert("Por favor, forneça a assinatura digital do APAC responsável.");
+            alert("Por favor, forneça a assinatura digital do APAC.");
             return;
         }
 
         btnSubmit.disabled = true;
-        btnSubmit.innerText = "Enviando Teste do DT...";
+        btnSubmit.innerText = "Salvando registro...";
         feedbackMessage.style.display = 'none';
 
-        const equip = equipDatabase[pdmSelect.value];
+        const checks = document.querySelectorAll('.pass-check');
         const okCount = calculateResults();
-        const travessiasState = Array.from(passChecks).map(c => c.checked);
+        const totalTests = checks.length;
+        const travessiasState = Array.from(checks).map(c => c.checked);
 
         const payload = {
-            pdmId: pdmSelect.value,
-            modelo: equip.modelo,
-            numeroSerie: equip.numeroSerie,
-            localizacao: equip.localizacao,
+            equipamentoId: equipSelect.value,
+            tipoEquipamento: selected.tipo,
+            modelo: selected.modelo,
+            numeroSerie: selected.numeroSerie,
+            localizacao: selected.localizacao,
             dataTeste: document.getElementById('dataTeste').value,
-            nivelAmeaca: nivelAmeacaSelect.value,
-            dispositivoDT: dispositivoDTSelect.value,
-            sensibilidade: document.getElementById('sensibilidade').value,
+            nivelAmeaca: selected.tipo === 'PDM' ? nivelAmeacaSelect.value : 'N/A',
+            dispositivoDT: selected.tipo === 'PDM' ? dispositivoDTSelect.value : 'N/A',
+            sensibilidade: selected.tipo === 'PDM' ? document.getElementById('sensibilidade').value : 'N/A',
             travessias: travessiasState,
-            alarmesObtidos: okCount,
-            resultadoDT: okCount >= 4 ? 'CONFORME (Aprovado)' : 'NÃO CONFORME',
+            alarmesObtidos: `${okCount}/${totalTests}`,
+            resultado: statusBanner.classList.contains('status-aprovado') ? 'CONFORME' : 'NÃO CONFORME',
             observacoes: document.getElementById('observacoes').value,
             nomeAPAC: nomeAPACSelect.value,
             assinaturaBase64: canvas.toDataURL("image/png")
@@ -518,38 +557,26 @@
             const result = await response.json();
 
             if (result.status === 'success') {
-                feedbackMessage.className = 'feedback-success';
-                feedbackMessage.innerText = ` Teste do ${dispositivoDTSelect.value} registrado com sucesso!`;
+                feedbackMessage.className = 'feedback-message feedback-success';
+                feedbackMessage.innerText = 'Registro do teste salvo com sucesso!';
                 
-                // Limpa assinatura e reseta switches
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 hasSignature = false;
-                passChecks.forEach(c => c.checked = true);
-                
-                // Se for o primeiro DT do par, seleciona automaticamente o segundo DT para facilitar
-                if (dispositivoDTSelect.selectedIndex === 0 && dispositivoDTSelect.options.length > 1) {
-                    dispositivoDTSelect.selectedIndex = 1;
-                }
-
-                calculateResults();
+                updateEquipmentUI();
             } else {
                 throw new Error(result.message || 'Erro ao salvar.');
             }
         } catch (err) {
-            feedbackMessage.className = 'feedback-error';
-            feedbackMessage.innerText = ' Falha ao registrar: ' + err.message;
+            feedbackMessage.className = 'feedback-message feedback-error';
+            feedbackMessage.innerText = 'Falha ao registrar: ' + err.message;
         } finally {
             feedbackMessage.style.display = 'block';
             btnSubmit.disabled = false;
-            btnSubmit.innerText = "Salvar Teste deste DT";
+            btnSubmit.innerText = "Salvar Registro";
         }
     });
 
-    // Inicialização
-    updateEquipmentDetails();
-    updateDTOptions();
-    loadAPACs();
+    initData();
 </script>
-
 </body>
 </html>
