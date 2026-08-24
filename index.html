@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Teste de Calibração Diária de PDM - GIG</title>
+    <title>SGG - Teste Individual de DT</title>
     <style>
         :root {
             --bg-color: #0f172a;
@@ -14,7 +14,6 @@
             --accent: #38bdf8;
             --success: #22c55e;
             --danger: #ef4444;
-            --warning: #f59e0b;
             --input-bg: #0f172a;
             --input-border: #475569;
             --radius: 12px;
@@ -77,16 +76,8 @@
             margin-bottom: 16px;
         }
 
-        .form-group {
-            margin-bottom: 14px;
-        }
-
-        .form-group label {
-            display: block;
-            font-size: 0.85rem;
-            font-weight: 600;
-            margin-bottom: 6px;
-        }
+        .form-group { margin-bottom: 14px; }
+        .form-group label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 6px; }
 
         .form-control {
             width: 100%;
@@ -99,9 +90,7 @@
             outline: none;
         }
 
-        .form-control:focus {
-            border-color: var(--accent);
-        }
+        .form-control:focus { border-color: var(--accent); }
 
         select.form-control {
             appearance: none;
@@ -125,37 +114,7 @@
         .equipment-details span { color: var(--text-muted); display: block; }
         .equipment-details strong { color: var(--accent); font-size: 0.85rem; }
 
-        .rules-card {
-            background: rgba(56, 189, 248, 0.08);
-            border-left: 3px solid var(--accent);
-            padding: 10px;
-            border-radius: 6px;
-            font-size: 0.75rem;
-            margin-bottom: 16px;
-            line-height: 1.4;
-        }
-
-        .rules-card ul { margin-left: 16px; margin-top: 4px; }
-
-        .badge-dt {
-            display: block;
-            background: #0f172a;
-            border: 1px solid var(--accent);
-            color: var(--accent);
-            padding: 8px 10px;
-            border-radius: 6px;
-            font-size: 0.8rem;
-            font-weight: bold;
-            margin-top: 6px;
-        }
-
-        /* Estilização dos 5 Switches de Travessias */
-        .pass-list {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            margin-top: 6px;
-        }
+        .pass-list { display: flex; flex-direction: column; gap: 8px; margin-top: 6px; }
 
         .pass-item {
             display: flex;
@@ -164,19 +123,16 @@
             background: var(--input-bg);
             border: 1px solid var(--input-border);
             border-radius: 8px;
-            padding: 10px 12px;
+            padding: 8px 12px;
         }
 
-        .pass-label {
-            font-size: 0.85rem;
-            font-weight: bold;
-        }
+        .pass-label { font-size: 0.85rem; font-weight: bold; }
 
         .toggle-switch {
             position: relative;
             display: inline-block;
-            width: 60px;
-            height: 30px;
+            width: 56px;
+            height: 28px;
         }
 
         .toggle-switch input { opacity: 0; width: 0; height: 0; }
@@ -188,48 +144,33 @@
             background-color: var(--danger);
             transition: .3s;
             border-radius: 30px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 6px;
-            font-size: 0.65rem;
-            font-weight: bold;
-            color: #ffffff;
         }
 
         .slider:before {
             position: absolute;
             content: "";
-            height: 22px;
-            width: 22px;
+            height: 20px;
+            width: 20px;
             left: 4px;
             bottom: 4px;
             background-color: white;
             transition: .3s;
             border-radius: 50%;
-            z-index: 2;
         }
 
-        input:checked + .slider {
-            background-color: var(--success);
-        }
+        input:checked + .slider { background-color: var(--success); }
+        input:checked + .slider:before { transform: translateX(28px); }
 
-        input:checked + .slider:before {
-            transform: translateX(30px);
-        }
-
-        /* Canvas de Assinatura */
         .signature-container {
             background: #ffffff;
             border: 2px dashed var(--input-border);
             border-radius: 8px;
-            position: relative;
             touch-action: none;
         }
 
         canvas {
             width: 100%;
-            height: 130px;
+            height: 120px;
             display: block;
             border-radius: 6px;
             cursor: crosshair;
@@ -249,7 +190,6 @@
             margin-left: auto;
         }
 
-        /* Banner de Resultado Dinâmico */
         .status-banner {
             padding: 12px;
             border-radius: 8px;
@@ -258,20 +198,10 @@
             text-align: center;
             margin-top: 14px;
             margin-bottom: 16px;
-            transition: all 0.3s ease;
         }
 
-        .status-aprovado {
-            background: rgba(34, 197, 94, 0.2);
-            color: var(--success);
-            border: 1px solid var(--success);
-        }
-
-        .status-reprovado {
-            background: rgba(239, 68, 68, 0.2);
-            color: var(--danger);
-            border: 1px solid var(--danger);
-        }
+        .status-aprovado { background: rgba(34, 197, 94, 0.2); color: var(--success); border: 1px solid var(--success); }
+        .status-reprovado { background: rgba(239, 68, 68, 0.2); color: var(--danger); border: 1px solid var(--danger); }
 
         .btn-submit {
             width: 100%;
@@ -286,11 +216,7 @@
             margin-top: 8px;
         }
 
-        .btn-submit:disabled {
-            background-color: var(--input-border);
-            color: var(--text-muted);
-            cursor: not-allowed;
-        }
+        .btn-submit:disabled { background-color: var(--input-border); color: var(--text-muted); cursor: not-allowed; }
 
         #feedbackMessage {
             margin-top: 14px;
@@ -307,12 +233,12 @@
 
 <div class="app-container">
     <div class="header">
-        <h1>Calibração Diária de PDM</h1>
-        <p>Inspeção conforme RBAC 107 / IS 107 - ANAC</p>
+        <h1>Calibração Diária PDM</h1>
+        <p>Teste por Dispositivo (DT)</p>
     </div>
 
     <form id="calibrationForm">
-        <!-- Seleção do Equipamento -->
+        <!-- Equipamento -->
         <div class="pdm-selector-box">
             <div class="form-group" style="margin-bottom: 0;">
                 <label for="pdmSelect">Equipamento PDM *</label>
@@ -329,100 +255,73 @@
             </div>
         </div>
 
-        <!-- Instruções operacionais -->
-        <div class="rules-card">
-            <strong>Regra do Teste Diário (ANAC):</strong>
-            <ul>
-                <li>APAC livre de objetos metálicos próprios.</li>
-                <li><strong>Posição do DT:</strong> Costas do APAC, centro da cintura.</li>
-                <li><strong>Procedimento:</strong> Atravessar 5 vezes. Marque OK quando o alarme disparar.</li>
-            </ul>
-        </div>
-
         <!-- Data do Teste -->
         <div class="form-group">
             <label for="dataTeste">Data do Teste *</label>
             <input type="date" id="dataTeste" class="form-control" required>
         </div>
 
-        <!-- Nível de Ameaça do Aeródromo -->
+        <!-- Nível de Ameaça -->
         <div class="form-group">
-            <label for="nivelAmeaca">Nível de Ameaça Vigente no Aeródromo *</label>
+            <label for="nivelAmeaca">Nível de Ameaça Vigente *</label>
             <select id="nivelAmeaca" class="form-control" required>
                 <option value="NORMAL">NORMAL (Utiliza DT 01 e DT 02)</option>
                 <option value="ELEVADO">ELEVADO - Âmbar/Vermelho (Utiliza DT 03 e DT 04)</option>
             </select>
-            <div id="dispDispositivosDT" class="badge-dt">Dispositivos: DT 01 (178g) + DT 02 (240g)</div>
+        </div>
+
+        <!-- Seleção do DT do Teste Atual -->
+        <div class="form-group">
+            <label for="dispositivoDT">Dispositivo de Teste (DT) a ser Testado *</label>
+            <select id="dispositivoDT" class="form-control" required></select>
         </div>
 
         <!-- Sensibilidade -->
         <div class="form-group">
-            <label for="sensibilidade">Ajuste de Sensibilidade Atual do PDM *</label>
+            <label for="sensibilidade"> Sensibilidade Atual do PDM *</label>
             <input type="text" id="sensibilidade" class="form-control" placeholder="Ex: Nível 5 / A10" required>
         </div>
 
-        <!-- Registro das 5 Travessias -->
+        <!-- 5 Travessias -->
         <div class="form-group">
-            <label>Detecção por Travessia (Sinalize OK quando houver Alarme) *</label>
+            <label id="lblTravessias">5 Travessias com o Dispositivo *</label>
             <div class="pass-list">
-                <div class="pass-item">
-                    <span class="pass-label">1ª Travessia</span>
-                    <label class="toggle-switch">
-                        <input type="checkbox" class="pass-check" checked>
-                        <span class="slider"></span>
-                    </label>
-                </div>
-                <div class="pass-item">
-                    <span class="pass-label">2ª Travessia</span>
-                    <label class="toggle-switch">
-                        <input type="checkbox" class="pass-check" checked>
-                        <span class="slider"></span>
-                    </label>
-                </div>
-                <div class="pass-item">
-                    <span class="pass-label">3ª Travessia</span>
-                    <label class="toggle-switch">
-                        <input type="checkbox" class="pass-check" checked>
-                        <span class="slider"></span>
-                    </label>
-                </div>
-                <div class="pass-item">
-                    <span class="pass-label">4ª Travessia</span>
-                    <label class="toggle-switch">
-                        <input type="checkbox" class="pass-check" checked>
-                        <span class="slider"></span>
-                    </label>
-                </div>
-                <div class="pass-item">
-                    <span class="pass-label">5ª Travessia</span>
-                    <label class="toggle-switch">
-                        <input type="checkbox" class="pass-check" checked>
-                        <span class="slider"></span>
-                    </label>
-                </div>
+                <script>
+                    for(let i=1; i<=5; i++) {
+                        document.write(`
+                            <div class="pass-item">
+                                <span class="pass-label">${i}ª Travessia</span>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" class="pass-check" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        `);
+                    }
+                </script>
             </div>
         </div>
 
-        <!-- Banner do Resultado Dinâmico -->
+        <!-- Status Banner -->
         <div id="statusBanner" class="status-banner status-aprovado">
-            ✓ PDM CALIBRADO / APROVADO (Mínimo 4/5 atingido)
+            ✓ DT APROVADO (5/5 Alarmes)
         </div>
 
         <!-- Observações -->
         <div class="form-group">
             <label for="observacoes">Observações / Ações Tomadas</label>
-            <textarea id="observacoes" class="form-control" rows="2" placeholder="Descreva ajustes ou motivo da interrupção do uso..."></textarea>
+            <textarea id="observacoes" class="form-control" rows="2" placeholder="Descreva ajustes ou motivo da reprovação..."></textarea>
         </div>
 
-        <!-- Dropdown de APACs Responsáveis (Registrados na Planilha) -->
+        <!-- Dropdown APAC -->
         <div class="form-group">
             <label for="nomeAPAC">Nome do APAC Responsável *</label>
             <select id="nomeAPAC" class="form-control" required>
-                <option value="">Carregando APACs cadastrados...</option>
+                <option value="">Carregando APACs...</option>
             </select>
         </div>
 
-        <!-- Campo para Assinatura Manual (Canvas Desenho) -->
+        <!-- Assinatura Canvas -->
         <div class="form-group">
             <label>Assinatura Digital do APAC Responsável *</label>
             <div class="signature-container">
@@ -431,7 +330,7 @@
             <button type="button" class="btn-clear-sig" id="btnClearSig">Limpar Assinatura</button>
         </div>
 
-        <button type="submit" id="btnSubmit" class="btn-submit">Salvar Teste de Calibração</button>
+        <button type="submit" id="btnSubmit" class="btn-submit">Salvar Teste deste DT</button>
     </form>
 
     <div id="feedbackMessage"></div>
@@ -445,18 +344,16 @@
 
     const pdmSelect = document.getElementById('pdmSelect');
     const nivelAmeacaSelect = document.getElementById('nivelAmeaca');
-    const dispDispositivosDT = document.getElementById('dispDispositivosDT');
+    const dispositivoDTSelect = document.getElementById('dispositivoDT');
     const statusBanner = document.getElementById('statusBanner');
     const observacoesInput = document.getElementById('observacoes');
-    const passChecks = document.querySelectorAll('.pass-check');
     const nomeAPACSelect = document.getElementById('nomeAPAC');
+    const passChecks = document.querySelectorAll('.pass-check');
 
-    // Carrega a lista de APACs via API do Google Sheets
     async function loadAPACs() {
         try {
             const response = await fetch('/api/gas');
             const data = await response.json();
-            
             if (data.status === 'success' && data.apacs.length > 0) {
                 nomeAPACSelect.innerHTML = '<option value="">Selecione seu nome...</option>';
                 data.apacs.forEach(apac => {
@@ -466,14 +363,13 @@
                     nomeAPACSelect.appendChild(opt);
                 });
             } else {
-                nomeAPACSelect.innerHTML = '<option value="">Nenhum APAC cadastrado no Google Sheets</option>';
+                nomeAPACSelect.innerHTML = '<option value="">Nenhum APAC cadastrado</option>';
             }
         } catch (err) {
-            nomeAPACSelect.innerHTML = '<option value="">Erro ao carregar lista de APACs</option>';
+            nomeAPACSelect.innerHTML = '<option value="">Erro ao carregar APACs</option>';
         }
     }
 
-    // Atualiza Equipamento selecionado
     function updateEquipmentDetails() {
         const selected = equipDatabase[pdmSelect.value];
         if (selected) {
@@ -483,37 +379,42 @@
         }
     }
 
-    // Atualiza Regra de Nível de Ameaça (DTs)
-    function updateDT() {
+    function updateDTOptions() {
+        dispositivoDTSelect.innerHTML = '';
         if (nivelAmeacaSelect.value === 'NORMAL') {
-            dispDispositivosDT.innerText = "Dispositivos: DT 01 (Ferroso 178g) + DT 02 (Não Magnético 240g)";
+            dispositivoDTSelect.innerHTML += '<option value="DT 01 (Ferroso 178g)">DT 01 (Ferroso Magnetizável - 178g)</option>';
+            dispositivoDTSelect.innerHTML += '<option value="DT 02 (Não Magnético 240g)">DT 02 (Ferroso Não Magnético - 240g)</option>';
         } else {
-            dispDispositivosDT.innerText = "Dispositivos: DT 03 (104g) + DT 04 (120g)";
+            dispositivoDTSelect.innerHTML += '<option value="DT 03 (104g)">DT 03 (104g)</option>';
+            dispositivoDTSelect.innerHTML += '<option value="DT 04 (120g)">DT 04 (120g)</option>';
         }
+        calculateResults();
     }
 
-    // Calcula Travessias marcadas com OK
     function calculateResults() {
         let okCount = 0;
-        passChecks.forEach(check => { if (check.checked) okCount++; });
+        passChecks.forEach(c => { if (c.checked) okCount++; });
+
+        const selectedDT = dispositivoDTSelect.value;
 
         if (okCount >= 4) {
             statusBanner.className = "status-banner status-aprovado";
-            statusBanner.innerHTML = `✓ PDM CALIBRADO / APROVADO (${okCount}/5 Alarmes Detectados)`;
+            statusBanner.innerHTML = `✓ ${selectedDT}: APROVADO (${okCount}/5 Alarmes)`;
             observacoesInput.required = false;
         } else {
             statusBanner.className = "status-banner status-reprovado";
-            statusBanner.innerHTML = `⚠ PDM NÃO CALIBRADO (${okCount}/5 Alarmes Detectados)<br><span style="font-size:0.75rem; font-weight:normal;">Ajuste a sensibilidade e repita. Se persistir, INTERROMPA o uso para manutenção!</span>`;
+            statusBanner.innerHTML = `⚠ ${selectedDT}: NÃO CONFORME (${okCount}/5 Alarmes)<br><span style="font-size:0.75rem; font-weight:normal;">Ajuste a sensibilidade e repita o teste deste DT.</span>`;
             observacoesInput.required = true;
         }
         return okCount;
     }
 
-    passChecks.forEach(check => check.addEventListener('change', calculateResults));
+    passChecks.forEach(c => c.addEventListener('change', calculateResults));
     pdmSelect.addEventListener('change', updateEquipmentDetails);
-    nivelAmeacaSelect.addEventListener('change', updateDT);
+    nivelAmeacaSelect.addEventListener('change', updateDTOptions);
+    dispositivoDTSelect.addEventListener('change', calculateResults);
 
-    // Configuração do Canvas de Assinatura
+    // Canvas Assinatura
     const canvas = document.getElementById('signatureCanvas');
     const ctx = canvas.getContext('2d');
     let isDrawing = false;
@@ -570,7 +471,7 @@
 
     document.getElementById('dataTeste').valueAsDate = new Date();
 
-    // Envio do formulário
+    // Envio do Formulário
     document.getElementById('calibrationForm').addEventListener('submit', async (e) => {
         e.preventDefault();
 
@@ -578,17 +479,17 @@
         const feedbackMessage = document.getElementById('feedbackMessage');
 
         if (!hasSignature) {
-            alert("Por favor, colete a assinatura do APAC responsável no quadro de desenho.");
+            alert("Por favor, forneça a assinatura digital do APAC responsável.");
             return;
         }
 
         btnSubmit.disabled = true;
-        btnSubmit.innerText = "Enviando dados...";
+        btnSubmit.innerText = "Enviando Teste do DT...";
         feedbackMessage.style.display = 'none';
 
         const equip = equipDatabase[pdmSelect.value];
         const okCount = calculateResults();
-        const travessiasState = Array.from(passChecks).map(check => check.checked);
+        const travessiasState = Array.from(passChecks).map(c => c.checked);
 
         const payload = {
             pdmId: pdmSelect.value,
@@ -597,11 +498,11 @@
             localizacao: equip.localizacao,
             dataTeste: document.getElementById('dataTeste').value,
             nivelAmeaca: nivelAmeacaSelect.value,
-            dispositivosDT: nivelAmeacaSelect.value === 'NORMAL' ? 'DT 01 (178g) + DT 02 (240g)' : 'DT 03 (104g) + DT 04 (120g)',
+            dispositivoDT: dispositivoDTSelect.value,
             sensibilidade: document.getElementById('sensibilidade').value,
             travessias: travessiasState,
             alarmesObtidos: okCount,
-            resultadoFinal: okCount >= 4 ? 'CONFORME (Aprovado)' : 'NÃO CONFORME (Interromper Uso)',
+            resultadoDT: okCount >= 4 ? 'CONFORME (Aprovado)' : 'NÃO CONFORME',
             observacoes: document.getElementById('observacoes').value,
             nomeAPAC: nomeAPACSelect.value,
             assinaturaBase64: canvas.toDataURL("image/png")
@@ -618,14 +519,18 @@
 
             if (result.status === 'success') {
                 feedbackMessage.className = 'feedback-success';
-                feedbackMessage.innerText = ' Calibração e Assinatura salvas com sucesso no Google Sheets!';
-                document.getElementById('calibrationForm').reset();
-                document.getElementById('dataTeste').valueAsDate = new Date();
+                feedbackMessage.innerText = ` Teste do ${dispositivoDTSelect.value} registrado com sucesso!`;
+                
+                // Limpa assinatura e reseta switches
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 hasSignature = false;
                 passChecks.forEach(c => c.checked = true);
-                updateEquipmentDetails();
-                updateDT();
+                
+                // Se for o primeiro DT do par, seleciona automaticamente o segundo DT para facilitar
+                if (dispositivoDTSelect.selectedIndex === 0 && dispositivoDTSelect.options.length > 1) {
+                    dispositivoDTSelect.selectedIndex = 1;
+                }
+
                 calculateResults();
             } else {
                 throw new Error(result.message || 'Erro ao salvar.');
@@ -636,14 +541,13 @@
         } finally {
             feedbackMessage.style.display = 'block';
             btnSubmit.disabled = false;
-            btnSubmit.innerText = "Salvar Teste de Calibração";
+            btnSubmit.innerText = "Salvar Teste deste DT";
         }
     });
 
     // Inicialização
     updateEquipmentDetails();
-    updateDT();
-    calculateResults();
+    updateDTOptions();
     loadAPACs();
 </script>
 
