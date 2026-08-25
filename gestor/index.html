@@ -187,44 +187,55 @@
         document.getElementById('themeText').innerText = tema === 'dark' ? 'Modo Claro' : 'Modo Escuro';
     }
 
-    // Formatação ultra defensiva para dd/mm/yyyy hh:mm ou dd/mm/yyyy
+    // Formata o valor de data para o padrão dd/mm/yyyy hh:mm
     function formatarParaDDMMYYYY_HHMM(val) {
-        if (!val) return '';
-        let str = String(val).trim();
-        if (!str) return '';
+        if (!val) return '-';
+        const str = String(val).trim();
+        if (!str) return '-';
 
         try {
-            // Formato ISO (yyyy-mm-ddT... ou yyyy-mm-dd...)
+            const d = new Date(str);
+            // Verifica se a data é válida via objeto Date nativo
+            if (!isNaN(d.getTime())) {
+                const dia = String(d.getDate()).padStart(2, '0');
+                const mes = String(d.getMonth() + 1).padStart(2, '0');
+                const ano = d.getFullYear();
+                const hora = String(d.getHours()).padStart(2, '0');
+                const min = String(d.getMinutes()).padStart(2, '0');
+                return `${dia}/${mes}/${ano} ${hora}:${min}`;
+            }
+
+            // Fallback para strings ISO (yyyy-mm-ddTHH:mm:ss ou yyyy-mm-dd)
             if (str.includes('T') || str.match(/^\d{4}-\d{2}-\d{2}/)) {
                 const partsT = str.split('T');
                 const dataParts = partsT[0] ? partsT[0].split('-') : [];
                 if (dataParts.length === 3) {
-                    const dataStr = `${(dataParts[2] || '').substring(0,2).padStart(2, '0')}/${(dataParts[1] || '').padStart(2, '0')}/${dataParts[0]}`;
-                    
+                    const dataStr = `${dataParts[2].substring(0,2).padStart(2, '0')}/${dataParts[1].padStart(2, '0')}/${dataParts[0]}`;
+                    let horaStr = '00:00';
                     if (partsT[1]) {
                         const horaParts = partsT[1].split(':');
                         if (horaParts.length >= 2) {
-                            return `${dataStr} ${(horaParts[0] || '').padStart(2, '0')}:${(horaParts[1] || '').padStart(2, '0')}`;
+                            horaStr = `${horaParts[0].padStart(2, '0')}:${horaParts[1].padStart(2, '0')}`;
                         }
                     }
-                    return dataStr;
+                    return `${dataStr} ${horaStr}`;
                 }
             }
 
-            // Formato pt-BR (dd/mm/yyyy ...)
+            // Fallback para strings no formato pt-BR
             if (str.match(/^\d{1,2}\/\d{1,2}\/\d{4}/)) {
                 const partsSpace = str.split(' ');
                 const dataParts = partsSpace[0] ? partsSpace[0].split('/') : [];
                 if (dataParts.length === 3) {
-                    const dataStr = `${(dataParts[0] || '').padStart(2, '0')}/${(dataParts[1] || '').padStart(2, '0')}/${dataParts[2]}`;
-                    
+                    const dataStr = `${dataParts[0].padStart(2, '0')}/${dataParts[1].padStart(2, '0')}/${dataParts[2]}`;
+                    let horaStr = '00:00';
                     if (partsSpace[1]) {
                         const horaParts = partsSpace[1].split(':');
                         if (horaParts.length >= 2) {
-                            return `${dataStr} ${(horaParts[0] || '').padStart(2, '0')}:${(horaParts[1] || '').padStart(2, '0')}`;
+                            horaStr = `${horaParts[0].padStart(2, '0')}:${horaParts[1].padStart(2, '0')}`;
                         }
                     }
-                    return dataStr;
+                    return `${dataStr} ${horaStr}`;
                 }
             }
         } catch (err) {
