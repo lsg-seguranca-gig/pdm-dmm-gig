@@ -62,6 +62,11 @@
         .test-btn.ok { background: rgba(34, 197, 94, 0.2); border-color: var(--success); color: var(--success); }
         .test-btn.not-ok { background: rgba(239, 68, 68, 0.2); border-color: var(--danger); color: var(--danger); }
 
+        .posicao-box { background: var(--input-bg); border: 1px solid var(--input-border); border-radius: 8px; padding: 12px; margin-bottom: 10px; }
+        .posicao-header { font-size: 0.85rem; font-weight: bold; margin-bottom: 6px; color: var(--accent); }
+        .posicao-inputs { display: flex; align-items: center; gap: 10px; }
+        .taxa-badge { font-weight: bold; font-size: 0.9rem; }
+
         .signature-box { border: 1px dashed var(--input-border); border-radius: 8px; background: var(--canvas-bg); margin-top: 8px; width: 100%; height: 160px; touch-action: none; cursor: crosshair; }
         .sig-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 6px; }
 
@@ -98,20 +103,28 @@
                     <input type="text" id="tipoEquipamento" class="form-control" readonly>
                 </div>
                 <div class="form-group">
-                    <label>Data do Teste</label>
-                    <input type="date" id="dataTeste" class="form-control" required>
+                    <label>Frequência do Teste</label>
+                    <select id="frequenciaTeste" class="form-control" onchange="alternarFrequenciaTeste()" required>
+                        <option value="DIARIO">Diário</option>
+                        <option value="SEMANAL">Semanal (Apenas PDM)</option>
+                    </select>
                 </div>
             </div>
 
             <div class="grid-2">
                 <div class="form-group">
+                    <label>Data do Teste</label>
+                    <input type="date" id="dataTeste" class="form-control" required>
+                </div>
+                <div class="form-group">
                     <label>Modelo / Nº Série</label>
                     <input type="text" id="modeloSerie" class="form-control" readonly>
                 </div>
-                <div class="form-group">
-                    <label>Localização</label>
-                    <input type="text" id="localizacao" class="form-control" readonly>
-                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Localização</label>
+                <input type="text" id="localizacao" class="form-control" readonly>
             </div>
         </div>
 
@@ -145,11 +158,55 @@
             </div>
         </div>
 
-        <div class="form-card">
-            <h2>3. Testes de Detecção / Travessias</h2>
+        <!-- SEÇÃO 3A: Teste Diário (Padrão) -->
+        <div class="form-card" id="secaoTesteDiario">
+            <h2>3. Testes de Detecção / Travessias (Diário)</h2>
             <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:10px;">Toque no botão para alternar entre OK e NÃO OK:</p>
-            
             <div class="tests-grid" id="testsGrid"></div>
+        </div>
+
+        <!-- SEÇÃO 3B: Teste Semanal (Exclusivo PDM) -->
+        <div class="form-card" id="secaoTesteSemanal" style="display: none;">
+            <h2>3. Teste de Calibração Semanal - PDM (10 Travessias por Posição)</h2>
+            <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:12px;">
+                Realize 10 travessias para cada uma das 4 posições no corpo do APAC. Aprovação mínima: 80% (8/10) em cada posição.
+            </p>
+
+            <div class="posicao-box">
+                <div class="posicao-header">1. Altura dos ombros, embaixo do braço direito</div>
+                <div class="posicao-inputs">
+                    <label style="margin:0; font-size:0.85rem;">Alarmes (0 a 10):</label>
+                    <input type="number" id="alarmesPos1" class="form-control" min="0" max="10" value="0" style="width: 80px;" oninput="calcularResultadoSemanal()">
+                    <span id="taxaPos1" class="taxa-badge">0%</span>
+                </div>
+            </div>
+
+            <div class="posicao-box">
+                <div class="posicao-header">2. Altura da cintura, no bolso direito da calça</div>
+                <div class="posicao-inputs">
+                    <label style="margin:0; font-size:0.85rem;">Alarmes (0 a 10):</label>
+                    <input type="number" id="alarmesPos2" class="form-control" min="0" max="10" value="0" style="width: 80px;" oninput="calcularResultadoSemanal()">
+                    <span id="taxaPos2" class="taxa-badge">0%</span>
+                </div>
+            </div>
+
+            <div class="posicao-box">
+                <div class="posicao-header">3. Meio da cintura, na parte de trás</div>
+                <div class="posicao-inputs">
+                    <label style="margin:0; font-size:0.85rem;">Alarmes (0 a 10):</label>
+                    <input type="number" id="alarmesPos3" class="form-control" min="0" max="10" value="0" style="width: 80px;" oninput="calcularResultadoSemanal()">
+                    <span id="taxaPos3" class="taxa-badge">0%</span>
+                </div>
+            </div>
+
+            <div class="posicao-box">
+                <div class="posicao-header">4. Tornozelo direito</div>
+                <div class="posicao-inputs">
+                    <label style="margin:0; font-size:0.85rem;">Alarmes (0 a 10):</label>
+                    <input type="number" id="alarmesPos4" class="form-control" min="0" max="10" value="0" style="width: 80px;" oninput="calcularResultadoSemanal()">
+                    <span id="taxaPos4" class="taxa-badge">0%</span>
+                </div>
+            </div>
         </div>
 
         <div class="form-card">
@@ -255,6 +312,7 @@
                 estadoTravessias = [true, true, true, true, true];
             }
 
+            alternarFrequenciaTeste();
             renderizarBotoesTravessia();
             atualizarOpcoesDT();
         } else {
@@ -262,6 +320,32 @@
             document.getElementById('modeloSerie').value = '';
             document.getElementById('localizacao').value = '';
             document.getElementById('dispositivoDT').innerHTML = '<option value="">Selecione o equipamento...</option>';
+            alternarFrequenciaTeste();
+        }
+    }
+
+    function alternarFrequenciaTeste() {
+        const tipo = document.getElementById('tipoEquipamento').value;
+        const freqSelect = document.getElementById('frequenciaTeste');
+        const optSemanal = freqSelect.querySelector('option[value="SEMANAL"]');
+        const secaoDiario = document.getElementById('secaoTesteDiario');
+        const secaoSemanal = document.getElementById('secaoTesteSemanal');
+
+        if (tipo !== 'PDM') {
+            freqSelect.value = 'DIARIO';
+            optSemanal.disabled = true;
+        } else {
+            optSemanal.disabled = false;
+        }
+
+        if (freqSelect.value === 'SEMANAL' && tipo === 'PDM') {
+            secaoDiario.style.display = 'none';
+            secaoSemanal.style.display = 'block';
+            calcularResultadoSemanal();
+        } else {
+            secaoDiario.style.display = 'block';
+            secaoSemanal.style.display = 'none';
+            calcularResultadoDiario();
         }
     }
 
@@ -305,10 +389,10 @@
             grid.appendChild(btn);
         });
 
-        calcularResultado();
+        calcularResultadoDiario();
     }
 
-    function calcularResultado() {
+    function calcularResultadoDiario() {
         const tipo = document.getElementById('tipoEquipamento').value;
         const okCount = estadoTravessias.filter(x => x).length;
         const resInput = document.getElementById('resultado');
@@ -330,6 +414,46 @@
         }
     }
 
+    function calcularResultadoSemanal() {
+        const posicoes = [
+            { id: 'alarmesPos1', badge: 'taxaPos1' },
+            { id: 'alarmesPos2', badge: 'taxaPos2' },
+            { id: 'alarmesPos3', badge: 'taxaPos3' },
+            { id: 'alarmesPos4', badge: 'taxaPos4' }
+        ];
+
+        let aprovadoGeral = true;
+
+        posicoes.forEach((pos) => {
+            let inputEl = document.getElementById(pos.id);
+            let val = parseInt(inputEl.value) || 0;
+
+            if (val < 0) { val = 0; inputEl.value = 0; }
+            if (val > 10) { val = 10; inputEl.value = 10; }
+
+            const taxa = (val / 10) * 100;
+            const badgeEl = document.getElementById(pos.badge);
+
+            badgeEl.innerText = `${taxa}% (${val}/10)`;
+
+            if (taxa >= 80) {
+                badgeEl.style.color = "var(--success)";
+            } else {
+                badgeEl.style.color = "var(--danger)";
+                aprovadoGeral = false; // Exige 80% ou mais em TODAS as 4 posições
+            }
+        });
+
+        const resInput = document.getElementById('resultado');
+        if (aprovadoGeral) {
+            resInput.value = "CONFORME";
+            resInput.style.color = "var(--success)";
+        } else {
+            resInput.value = "NÃO CONFORME";
+            resInput.style.color = "var(--danger)";
+        }
+    }
+
     // Configuração do Canvas de Assinatura
     function initCanvas() {
         canvas = document.getElementById('sigCanvas');
@@ -338,7 +462,7 @@
         canvas.width = canvas.offsetWidth;
         canvas.height = canvas.offsetHeight;
         
-        ctx.strokeStyle = "#0000FF"; // Força o traço na cor Azul no momento do desenho
+        ctx.strokeStyle = "#0000FF";
         ctx.lineWidth = 2;
 
         const getPos = (e) => {
@@ -365,7 +489,6 @@
         ctx.clearRect(0, 0, canvas.width, canvas.height);
     }
 
-    // Extrai a assinatura garantindo Fundo Transparente e Traço Azul
     function obterAssinaturaTransparenteAzul() {
         const tempCanvas = document.createElement('canvas');
         tempCanvas.width = canvas.width;
@@ -375,7 +498,6 @@
         const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
         const data = imgData.data;
 
-        // Processa pixel por pixel: altera a cor desenhada para Azul Puro (#0000FF) mantendo a transparência
         for (let i = 0; i < data.length; i += 4) {
             const alpha = data[i + 3];
             if (alpha > 0) {
@@ -394,11 +516,35 @@
 
         const idEquip = document.getElementById('equipamentoId').value;
         const equip = dadosEquipamentos[idEquip] || {};
-        const okCount = estadoTravessias.filter(x => x).length;
+        const freqTeste = document.getElementById('frequenciaTeste').value;
+
+        let detalheTravessias = [];
+        let stringAlarmes = "";
+
+        if (freqTeste === 'SEMANAL') {
+            const p1 = document.getElementById('alarmesPos1').value || 0;
+            const p2 = document.getElementById('alarmesPos2').value || 0;
+            const p3 = document.getElementById('alarmesPos3').value || 0;
+            const p4 = document.getElementById('alarmesPos4').value || 0;
+
+            detalheTravessias = [
+                `Ombro Direito: ${p1}/10`,
+                `Bolso Direito: ${p2}/10`,
+                `Cintura Trás: ${p3}/10`,
+                `Tornozelo Direito: ${p4}/10`
+            ];
+            const somaTotal = parseInt(p1) + parseInt(p2) + parseInt(p3) + parseInt(p4);
+            stringAlarmes = `${somaTotal}/40 (Semanal)`;
+        } else {
+            detalheTravessias = estadoTravessias;
+            const okCount = estadoTravessias.filter(x => x).length;
+            stringAlarmes = `${okCount}/${estadoTravessias.length}`;
+        }
 
         const payload = {
             equipamentoId: idEquip,
             tipoEquipamento: document.getElementById('tipoEquipamento').value,
+            frequenciaTeste: freqTeste,
             modelo: equip.modelo || '',
             numeroSerie: equip.numeroSerie || '',
             localizacao: document.getElementById('localizacao').value,
@@ -406,8 +552,8 @@
             nivelAmeaca: document.getElementById('nivelAmeaca').value,
             dispositivoDT: document.getElementById('dispositivoDT').value,
             sensibilidade: document.getElementById('sensibilidade').value ? `${document.getElementById('sensibilidade').value}%` : 'N/A',
-            travessias: estadoTravessias,
-            alarmesObtidos: `${okCount}/${estadoTravessias.length}`,
+            travessias: detalheTravessias,
+            alarmesObtidos: stringAlarmes,
             resultado: document.getElementById('resultado').value,
             observacoes: document.getElementById('observacoes').value,
             nomeAPAC: document.getElementById('nomeAPAC').value,
