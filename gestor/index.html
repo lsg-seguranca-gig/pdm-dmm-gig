@@ -187,57 +187,66 @@
         document.getElementById('themeText').innerText = tema === 'dark' ? 'Modo Claro' : 'Modo Escuro';
     }
 
-    // Formata strings/datas para o padrão dd/mm/yyyy hh:mm ou dd/mm/yyyy
+    // Formatação ultra defensiva para dd/mm/yyyy hh:mm ou dd/mm/yyyy
     function formatarParaDDMMYYYY_HHMM(val) {
         if (!val) return '';
         let str = String(val).trim();
+        if (!str) return '';
 
-        // Se for string no formato ISO (yyyy-mm-ddTHH:mm:ss ou yyyy-mm-dd)
-        if (str.includes('T') || str.match(/^\d{4}-\d{2}-\d{2}/)) {
-            const partsT = str.split('T');
-            const dataParts = partsT[0].split('-');
-            const dataStr = `${dataParts[2].padStart(2, '0')}/${dataParts[1].padStart(2, '0')}/${dataParts[0]}`;
-            
-            if (partsT[1]) {
-                const horaParts = partsT[1].split(':');
-                if (horaParts.length >= 2) {
-                    return `${dataStr} ${horaParts[0].padStart(2, '0')}:${horaParts[1].padStart(2, '0')}`;
+        try {
+            // Formato ISO (yyyy-mm-ddT... ou yyyy-mm-dd...)
+            if (str.includes('T') || str.match(/^\d{4}-\d{2}-\d{2}/)) {
+                const partsT = str.split('T');
+                const dataParts = partsT[0] ? partsT[0].split('-') : [];
+                if (dataParts.length === 3) {
+                    const dataStr = `${(dataParts[2] || '').substring(0,2).padStart(2, '0')}/${(dataParts[1] || '').padStart(2, '0')}/${dataParts[0]}`;
+                    
+                    if (partsT[1]) {
+                        const horaParts = partsT[1].split(':');
+                        if (horaParts.length >= 2) {
+                            return `${dataStr} ${(horaParts[0] || '').padStart(2, '0')}:${(horaParts[1] || '').padStart(2, '0')}`;
+                        }
+                    }
+                    return dataStr;
                 }
             }
-            return dataStr;
-        }
 
-        // Se já tiver data no formato dd/mm/yyyy com ou sem hora
-        if (str.match(/^\d{1,2}\/\d{1,2}\/\d{4}/)) {
-            const partsSpace = str.split(' ');
-            const dataParts = partsSpace[0].split('/');
-            const dataStr = `${dataParts[0].padStart(2, '0')}/${dataParts[1].padStart(2, '0')}/${dataParts[2]}`;
-            
-            if (partsSpace[1]) {
-                const horaParts = partsSpace[1].split(':');
-                if (horaParts.length >= 2) {
-                    return `${dataStr} ${horaParts[0].padStart(2, '0')}:${horaParts[1].padStart(2, '0')}`;
+            // Formato pt-BR (dd/mm/yyyy ...)
+            if (str.match(/^\d{1,2}\/\d{1,2}\/\d{4}/)) {
+                const partsSpace = str.split(' ');
+                const dataParts = partsSpace[0] ? partsSpace[0].split('/') : [];
+                if (dataParts.length === 3) {
+                    const dataStr = `${(dataParts[0] || '').padStart(2, '0')}/${(dataParts[1] || '').padStart(2, '0')}/${dataParts[2]}`;
+                    
+                    if (partsSpace[1]) {
+                        const horaParts = partsSpace[1].split(':');
+                        if (horaParts.length >= 2) {
+                            return `${dataStr} ${(horaParts[0] || '').padStart(2, '0')}:${(horaParts[1] || '').padStart(2, '0')}`;
+                        }
+                    }
+                    return dataStr;
                 }
             }
-            return dataStr;
+        } catch (err) {
+            console.warn("Erro ao formatar data:", val, err);
         }
 
         return str;
     }
 
-    // Normaliza datas para ISO (yyyy-mm-dd) para a comparação dos filtros
     function normalizarParaISO(val) {
         if (!val) return '';
         const formatted = formatarParaDDMMYYYY_HHMM(val);
         const dataApenas = formatted.split(' ')[0];
-        if (dataApenas.match(/^\d{2}\/\d{2}\/\d{4}/)) {
+        if (dataApenas && dataApenas.match(/^\d{2}\/\d{2}\/\d{4}/)) {
             const parts = dataApenas.split('/');
-            return `${parts[2]}-${parts[1]}-${parts[0]}`;
+            if (parts.length === 3) {
+                return `${parts[2]}-${parts[1]}-${parts[0]}`;
+            }
         }
         return val;
     }
 
-    // Trata e limpa o texto dos alarmes para evitar exibição de datas GMT
     function sanitizarAlarmes(val) {
         if (!val) return '-';
         const str = String(val).trim();
@@ -402,7 +411,6 @@
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF('landscape');
 
-        // Captura a imagem do Banner/Logo
         const logoImg = document.getElementById('logoBanner');
         const logoBase64 = await getBase64Image(logoImg);
 
@@ -416,7 +424,7 @@
             r.resultado || '',
             r.nomeAPAC || '',
             r.observacoes || '',
-            '' // Espaço reservado para a assinatura desenhada na callback didDrawCell
+            ''
         ]);
 
         doc.autoTable({
@@ -456,12 +464,9 @@
         for (let i = 1; i <= totalPages; i++) {
             doc.setPage(i);
             
-            // CABEÇALHO
             if (logoBase64) {
-                // Logo no canto esquerdo (X: 14mm, Y: 8mm, W: 35mm, H: 14mm)
                 doc.addImage(logoBase64, 'PNG', 14, 8, 35, 14);
             }
-            // Título a 20mm (2cm) de distância do logo (14 + 35 + 20 = 69mm)
             doc.setFontSize(13);
             doc.setFont("helvetica", "bold");
             doc.text("Relatório de Testes de Calibração Diário", 69, 16);
@@ -469,15 +474,12 @@
             doc.setFont("helvetica", "normal");
             doc.text("Caterair Serviços de Bordo e Hotelaria LTDA - Base GIG", 69, 21);
 
-            // RODAPÉ
             const pageHeight = doc.internal.pageSize.height || doc.internal.pageSize.getHeight();
             doc.setFontSize(8);
             doc.setTextColor(100);
             
-            // Esquerda: Data e hora da geração
             doc.text(`Gerado em: ${dataGeracao}`, 14, pageHeight - 8);
             
-            // Direita: Número da página
             const textPage = `Página ${i} de ${totalPages}`;
             doc.text(textPage, doc.internal.pageSize.width - 14, pageHeight - 8, { align: 'right' });
         }
