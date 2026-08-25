@@ -84,7 +84,7 @@
 <body>
 
 <div class="top-banner">
-    <img src="../logo lsg.png" alt="LSG Sky Chefs Logo">
+    <img id="logoBanner" src="../logo lsg.png" alt="LSG Sky Chefs Logo">
     <button type="button" class="theme-toggle-btn" onclick="alternarTema()">
         <span id="themeIcon">☀️</span> <span id="themeText">Modo Claro</span>
     </button>
@@ -149,6 +149,7 @@
                     <th>Tipo</th>
                     <th>Modelo / Nº Série</th>
                     <th>Localização</th>
+                    <th>Travessias</th>
                     <th>Alarmes</th>
                     <th>Resultado</th>
                     <th>APAC Responsável</th>
@@ -158,7 +159,7 @@
             </thead>
             <tbody id="tableBody">
                 <tr>
-                    <td colspan="10" style="text-align: center; color: var(--text-muted);">Carregando registros...</td>
+                    <td colspan="11" style="text-align: center; color: var(--text-muted);">Carregando registros...</td>
                 </tr>
             </tbody>
         </table>
@@ -186,37 +187,64 @@
         document.getElementById('themeText').innerText = tema === 'dark' ? 'Modo Claro' : 'Modo Escuro';
     }
 
-    // Formata strings/datas para o padrão brasileiro dd/mm/yyyy
-    function formatarParaDDMMYYYY(val) {
+    // Formata strings/datas para o padrão dd/mm/yyyy hh:mm ou dd/mm/yyyy
+    function formatarParaDDMMYYYY_HHMM(val) {
         if (!val) return '';
         let str = String(val).trim();
 
-        if (str.includes('T')) str = str.split('T')[0];
-
-        if (str.match(/^\d{4}-\d{2}-\d{2}/)) {
-            const parts = str.split('-');
-            return `${parts[2].substring(0,2)}/${parts[1]}/${parts[0]}`;
+        // Se for string no formato ISO (yyyy-mm-ddTHH:mm:ss ou yyyy-mm-dd)
+        if (str.includes('T') || str.match(/^\d{4}-\d{2}-\d{2}/)) {
+            const partsT = str.split('T');
+            const dataParts = partsT[0].split('-');
+            const dataStr = `${dataParts[2].padStart(2, '0')}/${dataParts[1].padStart(2, '0')}/${dataParts[0]}`;
+            
+            if (partsT[1]) {
+                const horaParts = partsT[1].split(':');
+                if (horaParts.length >= 2) {
+                    return `${dataStr} ${horaParts[0].padStart(2, '0')}:${horaParts[1].padStart(2, '0')}`;
+                }
+            }
+            return dataStr;
         }
 
+        // Se já tiver data no formato dd/mm/yyyy com ou sem hora
         if (str.match(/^\d{1,2}\/\d{1,2}\/\d{4}/)) {
-            const parts = str.split('/');
-            const dia = parts[0].padStart(2, '0');
-            const mes = parts[1].padStart(2, '0');
-            return `${dia}/${mes}/${parts[2]}`;
+            const partsSpace = str.split(' ');
+            const dataParts = partsSpace[0].split('/');
+            const dataStr = `${dataParts[0].padStart(2, '0')}/${dataParts[1].padStart(2, '0')}/${dataParts[2]}`;
+            
+            if (partsSpace[1]) {
+                const horaParts = partsSpace[1].split(':');
+                if (horaParts.length >= 2) {
+                    return `${dataStr} ${horaParts[0].padStart(2, '0')}:${horaParts[1].padStart(2, '0')}`;
+                }
+            }
+            return dataStr;
         }
 
         return str;
     }
 
-    // Normaliza datas para ISO (yyyy-mm-dd) para facilitar a comparação nos filtros
+    // Normaliza datas para ISO (yyyy-mm-dd) para a comparação dos filtros
     function normalizarParaISO(val) {
         if (!val) return '';
-        const ddmmyyyy = formatarParaDDMMYYYY(val);
-        if (ddmmyyyy.match(/^\d{2}\/\d{2}\/\d{4}/)) {
-            const parts = ddmmyyyy.split('/');
+        const formatted = formatarParaDDMMYYYY_HHMM(val);
+        const dataApenas = formatted.split(' ')[0];
+        if (dataApenas.match(/^\d{2}\/\d{2}\/\d{4}/)) {
+            const parts = dataApenas.split('/');
             return `${parts[2]}-${parts[1]}-${parts[0]}`;
         }
         return val;
+    }
+
+    // Trata e limpa o texto dos alarmes para evitar exibição de datas GMT
+    function sanitizarAlarmes(val) {
+        if (!val) return '-';
+        const str = String(val).trim();
+        if (str.includes('GMT') || str.includes('Brasilia Standard Time') || str.includes('Standard Time')) {
+            return 'N/A';
+        }
+        return str;
     }
 
     async function carregarDados() {
@@ -234,12 +262,13 @@
                     }
 
                     return {
-                        dataTeste: formatarParaDDMMYYYY(r.dataTeste),
+                        dataTeste: formatarParaDDMMYYYY_HHMM(r.dataTeste || r.timestamp),
                         equipamentoId: r.equipamentoId || '-',
                         tipoEquipamento: tipoCalculado,
                         modeloSerie: r.modeloSerie || '-',
                         localizacao: r.localizacao || '-',
-                        alarmesObtidos: r.alarmesObtidos || '-',
+                        detalhesTestes: r.detalhesTestes || '-',
+                        alarmesObtidos: sanitizarAlarmes(r.alarmesObtidos),
                         resultado: r.resultado || 'CONFORME',
                         nomeAPAC: r.nomeAPAC || '-',
                         observacoes: r.observacoes || '-',
@@ -250,11 +279,11 @@
                 registrosFiltrados = [...registrosGlobais];
                 renderizarTabela();
             } else {
-                document.getElementById('tableBody').innerHTML = '<tr><td colspan="10" style="text-align:center;">Nenhum registro encontrado na planilha.</td></tr>';
+                document.getElementById('tableBody').innerHTML = '<tr><td colspan="11" style="text-align:center;">Nenhum registro encontrado na planilha.</td></tr>';
             }
         } catch (err) {
             console.error(err);
-            document.getElementById('tableBody').innerHTML = '<tr><td colspan="10" style="text-align:center;">Erro na conexão com o servidor.</td></tr>';
+            document.getElementById('tableBody').innerHTML = '<tr><td colspan="11" style="text-align:center;">Erro na conexão com o servidor.</td></tr>';
         }
     }
 
@@ -263,7 +292,7 @@
         tbody.innerHTML = '';
 
         if (registrosFiltrados.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;">Nenhum registro encontrado para os filtros selecionados.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;">Nenhum registro encontrado para os filtros selecionados.</td></tr>';
             return;
         }
 
@@ -278,6 +307,7 @@
                 <td>${reg.tipoEquipamento}</td>
                 <td>${reg.modeloSerie}</td>
                 <td>${reg.localizacao}</td>
+                <td>${reg.detalhesTestes}</td>
                 <td>${reg.alarmesObtidos}</td>
                 <td><span class="badge ${isConforme ? 'badge-conforme' : 'badge-nao-conforme'}">${reg.resultado}</span></td>
                 <td>${reg.nomeAPAC}</td>
@@ -331,6 +361,7 @@
             "Tipo": r.tipoEquipamento,
             "Modelo / Série": r.modeloSerie,
             "Localização": r.localizacao,
+            "Detalhamento Travessias": r.detalhesTestes,
             "Alarmes": r.alarmesObtidos,
             "Resultado": r.resultado,
             "APAC Responsável": r.nomeAPAC,
@@ -343,32 +374,113 @@
         XLSX.writeFile(wb, "Relatorio_Calibracao_LSG.xlsx");
     }
 
-    function exportarPDF() {
+    function getBase64Image(imgElement) {
+        return new Promise((resolve) => {
+            if (!imgElement) return resolve(null);
+            if (imgElement.complete && imgElement.naturalWidth !== 0) {
+                const canvas = document.createElement("canvas");
+                canvas.width = imgElement.naturalWidth;
+                canvas.height = imgElement.naturalHeight;
+                const ctx = canvas.getContext("2d");
+                ctx.drawImage(imgElement, 0, 0);
+                resolve(canvas.toDataURL("image/png"));
+            } else {
+                imgElement.onload = () => {
+                    const canvas = document.createElement("canvas");
+                    canvas.width = imgElement.naturalWidth;
+                    canvas.height = imgElement.naturalHeight;
+                    const ctx = canvas.getContext("2d");
+                    ctx.drawImage(imgElement, 0, 0);
+                    resolve(canvas.toDataURL("image/png"));
+                };
+                imgElement.onerror = () => resolve(null);
+            }
+        });
+    }
+
+    async function exportarPDF() {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF('landscape');
 
-        doc.setFontSize(14);
-        doc.text("Relatório de Testes de Calibração Diário", 14, 15);
-        doc.setFontSize(10);
-        doc.text("Caterair Serviços de Bordo e Hotelaria LTDA - Base GIG", 14, 22);
+        // Captura a imagem do Banner/Logo
+        const logoImg = document.getElementById('logoBanner');
+        const logoBase64 = await getBase64Image(logoImg);
 
         const tableData = registrosFiltrados.map(r => [
             r.dataTeste || '',
             r.equipamentoId || '',
             r.tipoEquipamento || '',
             r.localizacao || '',
+            r.detalhesTestes || '',
             r.alarmesObtidos || '',
             r.resultado || '',
             r.nomeAPAC || '',
-            r.observacoes || ''
+            r.observacoes || '',
+            '' // Espaço reservado para a assinatura desenhada na callback didDrawCell
         ]);
 
         doc.autoTable({
             startY: 28,
-            head: [['Data', 'ID Equip.', 'Tipo', 'Local', 'Alarmes', 'Resultado', 'APAC', 'Observações']],
+            head: [['Data Teste', 'ID Equip.', 'Tipo', 'Local', 'Detalhamento Travessias', 'Alarmes', 'Resultado', 'APAC', 'Observações', 'Assinatura']],
             body: tableData,
-            styles: { fontSize: 8 }
+            styles: { fontSize: 7, valign: 'middle' },
+            columnStyles: {
+                9: { cellWidth: 22, minCellHeight: 12 }
+            },
+            didDrawCell: function(data) {
+                if (data.section === 'body' && data.column.index === 9) {
+                    const reg = registrosFiltrados[data.row.index];
+                    if (reg && reg.assinaturaBase64 && reg.assinaturaBase64.startsWith('data:image')) {
+                        try {
+                            doc.addImage(
+                                reg.assinaturaBase64, 
+                                'PNG', 
+                                data.cell.x + 1, 
+                                data.cell.y + 1, 
+                                20, 
+                                10
+                            );
+                        } catch (e) {
+                            console.error('Erro ao renderizar assinatura no PDF:', e);
+                        }
+                    }
+                }
+            },
+            margin: { top: 28, bottom: 15 }
         });
+
+        const totalPages = doc.internal.getNumberOfPages();
+        const now = new Date();
+        const dataGeracao = formatarParaDDMMYYYY_HHMM(now.toISOString());
+
+        for (let i = 1; i <= totalPages; i++) {
+            doc.setPage(i);
+            
+            // CABEÇALHO
+            if (logoBase64) {
+                // Logo no canto esquerdo (X: 14mm, Y: 8mm, W: 35mm, H: 14mm)
+                doc.addImage(logoBase64, 'PNG', 14, 8, 35, 14);
+            }
+            // Título a 20mm (2cm) de distância do logo (14 + 35 + 20 = 69mm)
+            doc.setFontSize(13);
+            doc.setFont("helvetica", "bold");
+            doc.text("Relatório de Testes de Calibração Diário", 69, 16);
+            doc.setFontSize(9);
+            doc.setFont("helvetica", "normal");
+            doc.text("Caterair Serviços de Bordo e Hotelaria LTDA - Base GIG", 69, 21);
+
+            // RODAPÉ
+            const pageHeight = doc.internal.pageSize.height || doc.internal.pageSize.getHeight();
+            doc.setFontSize(8);
+            doc.setTextColor(100);
+            
+            // Esquerda: Data e hora da geração
+            doc.text(`Gerado em: ${dataGeracao}`, 14, pageHeight - 8);
+            
+            // Direita: Número da página
+            const textPage = `Página ${i} de ${totalPages}`;
+            doc.text(textPage, doc.internal.pageSize.width - 14, pageHeight - 8, { align: 'right' });
+        }
 
         doc.save("Relatorio_Calibracao_LSG.pdf");
     }
