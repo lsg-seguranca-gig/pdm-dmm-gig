@@ -38,12 +38,12 @@
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
         /* Estilo das Travessias/Testes */
-        .tests-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-top: 10px; }
+        .tests-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 8px; margin-top: 10px; }
         .test-btn { padding: 12px 5px; background: var(--input-bg); border: 1px solid var(--input-border); border-radius: 8px; color: var(--text-muted); font-weight: bold; font-size: 0.8rem; cursor: pointer; text-align: center; }
         .test-btn.ok { background: rgba(34, 197, 94, 0.2); border-color: var(--success); color: var(--success); }
         .test-btn.not-ok { background: rgba(239, 68, 68, 0.2); border-color: var(--danger); color: var(--danger); }
 
-        /* Modal de Assinatura Canvas */
+        /* Assinatura Canvas */
         .signature-box { border: 1px dashed var(--input-border); border-radius: 8px; background: #ffffff; margin-top: 8px; width: 100%; height: 160px; touch-action: none; }
         .sig-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 6px; }
 
@@ -129,7 +129,7 @@
             <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:10px;">Toque no botão para alternar entre OK e NÃO OK:</p>
             
             <div class="tests-grid" id="testsGrid">
-                <!-- Botões de travessia dinâmicos -->
+                <!-- Botões de travessia gerados dinamicamente -->
             </div>
         </div>
 
@@ -167,12 +167,10 @@
 
 <script>
     let dadosEquipamentos = {};
-    let estadoTravessias = [true, true, true, true, true]; // Default 5 travessias OK
+    let estadoTravessias = [true, true, true, true, true]; // Default: 5 testes (PDM)
     let canvas, ctx, desenhando = false;
 
-    // Inicialização da Data e Canvas
     window.addEventListener('DOMContentLoaded', () => {
-        document.getElementById('dataTeste').valueToDate = new Date();
         document.getElementById('dataTeste').value = new Date().toISOString().split('T')[0];
         
         initCanvas();
@@ -186,7 +184,6 @@
             const data = await resp.json();
 
             if (data.status === 'success') {
-                // Preenche Select de Equipamentos
                 dadosEquipamentos = data.equipamentos || {};
                 const selectEquip = document.getElementById('equipamentoId');
                 selectEquip.innerHTML = '<option value="">Selecione...</option>';
@@ -195,7 +192,6 @@
                     selectEquip.innerHTML += `<option value="${id}">${id}</option>`;
                 });
 
-                // Preenche Select de APACs
                 const selectApac = document.getElementById('nomeAPAC');
                 selectApac.innerHTML = '<option value="">Selecione o APAC...</option>';
                 (data.apacs || []).forEach(nome => {
@@ -216,8 +212,13 @@
             document.getElementById('modeloSerie').value = `${equip.modelo} / ${equip.numeroSerie}`;
             document.getElementById('localizacao').value = equip.localizacao;
             
-            // Ajusta o número de travessias default (5 para PDM/DMM)
-            estadoTravessias = [true, true, true, true, true];
+            // Regra: DMM carrega 3 testes | PDM carrega 5 testes
+            if (equip.tipo === 'DMM') {
+                estadoTravessias = [true, true, true];
+            } else {
+                estadoTravessias = [true, true, true, true, true];
+            }
+
             renderizarBotoesTravessia();
             atualizarOpcoesDT();
         } else {
@@ -228,7 +229,6 @@
         }
     }
 
-    // REGRA ATUALIZADA: PDM e DMM agora utilizam os mesmos DTs 01, 02, 03 e 04
     function atualizarOpcoesDT() {
         const tipo = document.getElementById('tipoEquipamento').value;
         const ameaca = document.getElementById('nivelAmeaca').value;
@@ -273,11 +273,21 @@
     }
 
     function calcularResultado() {
+        const tipo = document.getElementById('tipoEquipamento').value;
         const okCount = estadoTravessias.filter(x => x).length;
-        const total = estadoTravessias.length;
         const resInput = document.getElementById('resultado');
 
-        if (okCount === total) {
+        let eConforme = false;
+
+        if (tipo === 'DMM') {
+            // DMM: Exige 3 de 3 (100%)
+            eConforme = (okCount === 3);
+        } else {
+            // PDM: Exige no mínimo 4 de 5
+            eConforme = (okCount >= 4);
+        }
+
+        if (eConforme) {
             resInput.value = "CONFORME";
             resInput.style.color = "var(--success)";
         } else {
@@ -286,12 +296,10 @@
         }
     }
 
-    // Lógica do Canvas (Assinatura)
     function initCanvas() {
         canvas = document.getElementById('sigCanvas');
         ctx = canvas.getContext('2d');
         
-        // Ajusta resolução do canvas
         canvas.width = canvas.offsetWidth;
         canvas.height = canvas.offsetHeight;
         
@@ -322,7 +330,6 @@
         ctx.clearRect(0, 0, canvas.width, canvas.height);
     }
 
-    // Envio do Formulário
     document.getElementById('calibForm').addEventListener('submit', async (e) => {
         e.preventDefault();
 
