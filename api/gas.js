@@ -1,38 +1,10 @@
+// Exemplo em api/gas.js na Vercel
 export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Credentials', true);
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,POST');
-  res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Content-Type');
-
-  if (req.method === 'OPTIONS') {
-    res.status(200).end();
-    return;
-  }
-
-  const GAS_URL = process.env.GAS_URL;
-
-  if (!GAS_URL) {
-    return res.status(500).json({ error: 'A variável GAS_URL não está configurada na Vercel.' });
-  }
-
-  try {
-    if (req.method === 'GET') {
-      const response = await fetch(GAS_URL);
-      const data = await response.json();
-      return res.status(200).json(data);
-    } else if (req.method === 'POST') {
-      const response = await fetch(GAS_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(req.body),
-      });
-
-      const data = await response.json();
-      return res.status(200).json(data);
-    } else {
-      return res.status(405).json({ error: 'Método não permitido.' });
-    }
-  } catch (error) {
-    return res.status(500).json({ error: 'Erro de conexão com o banco do Google Sheets.', details: error.message });
-  }
+  const { action } = req.query;
+  const gasUrl = `https://script.google.com/macros/s/AKfycbwHn4_GnZrZ0DZoydDfDLV7011ut6GaBhD7nvkOK2ki4bnn4Pf0w-fTfLD521NWQ0Uj/exec?action=${action || ''}`;
+  
+  const response = await fetch(gasUrl);
+  const data = await response.json();
+  
+  res.status(200).json(data);
 }
