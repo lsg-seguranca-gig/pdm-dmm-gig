@@ -57,15 +57,16 @@
 
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
-        .tests-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 8px; margin-top: 10px; }
-        .test-btn { padding: 12px 5px; background: var(--input-bg); border: 1px solid var(--input-border); border-radius: 8px; color: var(--text-muted); font-weight: bold; font-size: 0.8rem; cursor: pointer; text-align: center; }
+        .tests-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(85px, 1fr)); gap: 8px; margin-top: 10px; }
+        .test-btn { padding: 8px 4px; background: var(--input-bg); border: 1px solid var(--input-border); border-radius: 8px; color: var(--text-muted); font-weight: bold; font-size: 0.75rem; cursor: pointer; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 2px; }
         .test-btn.ok { background: rgba(34, 197, 94, 0.2); border-color: var(--success); color: var(--success); }
         .test-btn.not-ok { background: rgba(239, 68, 68, 0.2); border-color: var(--danger); color: var(--danger); }
+        .btn-direction { font-size: 0.65rem; opacity: 0.85; text-transform: uppercase; }
 
-        .posicao-box { background: var(--input-bg); border: 1px solid var(--input-border); border-radius: 8px; padding: 12px; margin-bottom: 10px; }
-        .posicao-header { font-size: 0.85rem; font-weight: bold; margin-bottom: 6px; color: var(--accent); }
-        .posicao-inputs { display: flex; align-items: center; gap: 10px; }
-        .taxa-badge { font-weight: bold; font-size: 0.9rem; }
+        .posicao-box { background: var(--input-bg); border: 1px solid var(--input-border); border-radius: 8px; padding: 12px; margin-bottom: 14px; }
+        .posicao-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .posicao-title { font-size: 0.85rem; font-weight: bold; color: var(--accent); }
+        .taxa-badge { font-weight: bold; font-size: 0.85rem; }
 
         .signature-box { border: 1px dashed var(--input-border); border-radius: 8px; background: var(--canvas-bg); margin-top: 8px; width: 100%; height: 160px; touch-action: none; cursor: crosshair; }
         .sig-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 6px; }
@@ -158,54 +159,54 @@
             </div>
         </div>
 
-        <!-- SEÇÃO 3A: Teste Diário (Padrão) -->
+        <!-- SEÇÃO 3A: Teste Diário -->
         <div class="form-card" id="secaoTesteDiario">
             <h2>3. Testes de Detecção / Travessias (Diário)</h2>
             <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:10px;">Toque no botão para alternar entre OK e NÃO OK:</p>
             <div class="tests-grid" id="testsGrid"></div>
         </div>
 
-        <!-- SEÇÃO 3B: Teste Semanal (Exclusivo PDM) -->
+        <!-- SEÇÃO 3B: Teste Semanal PDM (Com Botões por Posição e Sentido) -->
         <div class="form-card" id="secaoTesteSemanal" style="display: none;">
             <h2>3. Teste de Calibração Semanal - PDM (10 Travessias por Posição)</h2>
             <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:12px;">
-                Realize 10 travessias para cada uma das 4 posições no corpo do APAC. Aprovação mínima: 80% (8/10) em cada posição.
+                Toque nos botões para alternar o status das travessias (Indicação de sentido: IDA e VOLTA). Aprovação mínima: 80% (8/10) em cada posição.
             </p>
 
+            <!-- Posição 1 -->
             <div class="posicao-box">
-                <div class="posicao-header">1. Altura dos ombros, embaixo do braço direito</div>
-                <div class="posicao-inputs">
-                    <label style="margin:0; font-size:0.85rem;">Alarmes (0 a 10):</label>
-                    <input type="number" id="alarmesPos1" class="form-control" min="0" max="10" value="0" style="width: 80px;" oninput="calcularResultadoSemanal()">
-                    <span id="taxaPos1" class="taxa-badge">0%</span>
+                <div class="posicao-header">
+                    <span class="posicao-title">1. Altura dos ombros, embaixo do braço direito</span>
+                    <span id="taxaPos1" class="taxa-badge">100% (10/10)</span>
                 </div>
+                <div class="tests-grid" id="gridPos1"></div>
             </div>
 
+            <!-- Posição 2 -->
             <div class="posicao-box">
-                <div class="posicao-header">2. Altura da cintura, no bolso direito da calça</div>
-                <div class="posicao-inputs">
-                    <label style="margin:0; font-size:0.85rem;">Alarmes (0 a 10):</label>
-                    <input type="number" id="alarmesPos2" class="form-control" min="0" max="10" value="0" style="width: 80px;" oninput="calcularResultadoSemanal()">
-                    <span id="taxaPos2" class="taxa-badge">0%</span>
+                <div class="posicao-header">
+                    <span class="posicao-title">2. Altura da cintura, no bolso direito da calça</span>
+                    <span id="taxaPos2" class="taxa-badge">100% (10/10)</span>
                 </div>
+                <div class="tests-grid" id="gridPos2"></div>
             </div>
 
+            <!-- Posição 3 -->
             <div class="posicao-box">
-                <div class="posicao-header">3. Meio da cintura, na parte de trás</div>
-                <div class="posicao-inputs">
-                    <label style="margin:0; font-size:0.85rem;">Alarmes (0 a 10):</label>
-                    <input type="number" id="alarmesPos3" class="form-control" min="0" max="10" value="0" style="width: 80px;" oninput="calcularResultadoSemanal()">
-                    <span id="taxaPos3" class="taxa-badge">0%</span>
+                <div class="posicao-header">
+                    <span class="posicao-title">3. Meio da cintura, na parte de trás</span>
+                    <span id="taxaPos3" class="taxa-badge">100% (10/10)</span>
                 </div>
+                <div class="tests-grid" id="gridPos3"></div>
             </div>
 
+            <!-- Posição 4 -->
             <div class="posicao-box">
-                <div class="posicao-header">4. Tornozelo direito</div>
-                <div class="posicao-inputs">
-                    <label style="margin:0; font-size:0.85rem;">Alarmes (0 a 10):</label>
-                    <input type="number" id="alarmesPos4" class="form-control" min="0" max="10" value="0" style="width: 80px;" oninput="calcularResultadoSemanal()">
-                    <span id="taxaPos4" class="taxa-badge">0%</span>
+                <div class="posicao-header">
+                    <span class="posicao-title">4. Tornozelo direito</span>
+                    <span id="taxaPos4" class="taxa-badge">100% (10/10)</span>
                 </div>
+                <div class="tests-grid" id="gridPos4"></div>
             </div>
         </div>
 
@@ -243,7 +244,16 @@
 
 <script>
     let dadosEquipamentos = {};
-    let estadoTravessias = [true, true, true, true, true];
+    let estadoTravessiasDiario = [true, true, true, true, true];
+    
+    // Matriz 4x10 para controlar as 10 travessias das 4 posições do teste semanal
+    let estadoTravessiasSemanal = [
+        Array(10).fill(true), // Posição 1
+        Array(10).fill(true), // Posição 2
+        Array(10).fill(true), // Posição 3
+        Array(10).fill(true)  // Posição 4
+    ];
+
     let canvas, ctx, desenhando = false;
 
     // Gerenciamento do Tema Claro/Escuro
@@ -269,7 +279,8 @@
         
         initCanvas();
         carregarOpcoesIniciais();
-        renderizarBotoesTravessia();
+        renderizarBotoesDiario();
+        renderizarBotoesSemanal();
     });
 
     async function carregarOpcoesIniciais() {
@@ -307,13 +318,13 @@
             document.getElementById('localizacao').value = equip.localizacao;
             
             if (equip.tipo === 'DMM') {
-                estadoTravessias = [true, true, true];
+                estadoTravessiasDiario = [true, true, true];
             } else {
-                estadoTravessias = [true, true, true, true, true];
+                estadoTravessiasDiario = [true, true, true, true, true];
             }
 
             alternarFrequenciaTeste();
-            renderizarBotoesTravessia();
+            renderizarBotoesDiario();
             atualizarOpcoesDT();
         } else {
             document.getElementById('tipoEquipamento').value = '';
@@ -341,7 +352,7 @@
         if (freqSelect.value === 'SEMANAL' && tipo === 'PDM') {
             secaoDiario.style.display = 'none';
             secaoSemanal.style.display = 'block';
-            calcularResultadoSemanal();
+            renderizarBotoesSemanal();
         } else {
             secaoDiario.style.display = 'block';
             secaoSemanal.style.display = 'none';
@@ -373,18 +384,19 @@
         }
     }
 
-    function renderizarBotoesTravessia() {
+    // Renderizador do Teste Diário
+    function renderizarBotoesDiario() {
         const grid = document.getElementById('testsGrid');
         grid.innerHTML = '';
         
-        estadoTravessias.forEach((isOk, idx) => {
+        estadoTravessiasDiario.forEach((isOk, idx) => {
             const btn = document.createElement('button');
             btn.type = 'button';
             btn.className = `test-btn ${isOk ? 'ok' : 'not-ok'}`;
-            btn.innerText = `T${idx + 1}: ${isOk ? 'OK' : 'NÃO OK'}`;
+            btn.innerHTML = `<span>T${idx + 1}: ${isOk ? 'OK' : 'NÃO OK'}</span>`;
             btn.onclick = () => {
-                estadoTravessias[idx] = !estadoTravessias[idx];
-                renderizarBotoesTravessia();
+                estadoTravessiasDiario[idx] = !estadoTravessiasDiario[idx];
+                renderizarBotoesDiario();
             };
             grid.appendChild(btn);
         });
@@ -394,7 +406,7 @@
 
     function calcularResultadoDiario() {
         const tipo = document.getElementById('tipoEquipamento').value;
-        const okCount = estadoTravessias.filter(x => x).length;
+        const okCount = estadoTravessiasDiario.filter(x => x).length;
         const resInput = document.getElementById('resultado');
 
         let eConforme = false;
@@ -414,35 +426,49 @@
         }
     }
 
-    function calcularResultadoSemanal() {
-        const posicoes = [
-            { id: 'alarmesPos1', badge: 'taxaPos1' },
-            { id: 'alarmesPos2', badge: 'taxaPos2' },
-            { id: 'alarmesPos3', badge: 'taxaPos3' },
-            { id: 'alarmesPos4', badge: 'taxaPos4' }
-        ];
-
+    // Renderizador do Teste Semanal (4 Posições x 10 Botões)
+    function renderizarBotoesSemanal() {
         let aprovadoGeral = true;
 
-        posicoes.forEach((pos) => {
-            let inputEl = document.getElementById(pos.id);
-            let val = parseInt(inputEl.value) || 0;
+        for (let posIdx = 0; posIdx < 4; posIdx++) {
+            const grid = document.getElementById(`gridPos${posIdx + 1}`);
+            grid.innerHTML = '';
 
-            if (val < 0) { val = 0; inputEl.value = 0; }
-            if (val > 10) { val = 10; inputEl.value = 10; }
+            let okCount = 0;
 
-            const taxa = (val / 10) * 100;
-            const badgeEl = document.getElementById(pos.badge);
+            for (let tIdx = 0; tIdx < 10; tIdx++) {
+                const isOk = estadoTravessiasSemanal[posIdx][tIdx];
+                if (isOk) okCount++;
 
-            badgeEl.innerText = `${taxa}% (${val}/10)`;
+                const sentido = (tIdx % 2 === 0) ? 'IDA' : 'VOLTA';
+
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = `test-btn ${isOk ? 'ok' : 'not-ok'}`;
+                btn.innerHTML = `
+                    <span>T${tIdx + 1}: ${isOk ? 'OK' : 'NÃO OK'}</span>
+                    <span class="btn-direction">(${sentido})</span>
+                `;
+
+                btn.onclick = () => {
+                    estadoTravessiasSemanal[posIdx][tIdx] = !estadoTravessiasSemanal[posIdx][tIdx];
+                    renderizarBotoesSemanal();
+                };
+
+                grid.appendChild(btn);
+            }
+
+            const taxa = (okCount / 10) * 100;
+            const badgeEl = document.getElementById(`taxaPos${posIdx + 1}`);
+            badgeEl.innerText = `${taxa}% (${okCount}/10)`;
 
             if (taxa >= 80) {
                 badgeEl.style.color = "var(--success)";
             } else {
                 badgeEl.style.color = "var(--danger)";
-                aprovadoGeral = false; // Exige 80% ou mais em TODAS as 4 posições
+                aprovadoGeral = false; // Exige 80% ou mais em TODAS as posições
             }
-        });
+        }
 
         const resInput = document.getElementById('resultado');
         if (aprovadoGeral) {
@@ -522,23 +548,20 @@
         let stringAlarmes = "";
 
         if (freqTeste === 'SEMANAL') {
-            const p1 = document.getElementById('alarmesPos1').value || 0;
-            const p2 = document.getElementById('alarmesPos2').value || 0;
-            const p3 = document.getElementById('alarmesPos3').value || 0;
-            const p4 = document.getElementById('alarmesPos4').value || 0;
+            let totalOkSemanal = 0;
+            const nomesPosicoes = ["Ombro D", "Bolso D", "Cintura Trás", "Tornozelo D"];
 
-            detalheTravessias = [
-                `Ombro Direito: ${p1}/10`,
-                `Bolso Direito: ${p2}/10`,
-                `Cintura Trás: ${p3}/10`,
-                `Tornozelo Direito: ${p4}/10`
-            ];
-            const somaTotal = parseInt(p1) + parseInt(p2) + parseInt(p3) + parseInt(p4);
-            stringAlarmes = `${somaTotal}/40 (Semanal)`;
+            estadoTravessiasSemanal.forEach((pos, pIdx) => {
+                const okPos = pos.filter(x => x).length;
+                totalOkSemanal += okPos;
+                detalheTravessias.push(`${nomesPosicoes[pIdx]}: ${okPos}/10 (${(okPos/10)*100}%)`);
+            });
+
+            stringAlarmes = `${totalOkSemanal}/40 (Semanal)`;
         } else {
-            detalheTravessias = estadoTravessias;
-            const okCount = estadoTravessias.filter(x => x).length;
-            stringAlarmes = `${okCount}/${estadoTravessias.length}`;
+            detalheTravessias = estadoTravessiasDiario;
+            const okCount = estadoTravessiasDiario.filter(x => x).length;
+            stringAlarmes = `${okCount}/${estadoTravessiasDiario.length}`;
         }
 
         const payload = {
