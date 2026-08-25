@@ -65,6 +65,7 @@
         .btn-primary { background: var(--accent); color: #ffffff; }
         .btn-excel { background: #107c41; color: #fff; }
         .btn-pdf { background: #b30b00; color: #fff; }
+        .btn-clear { background: transparent; border: 1px solid var(--input-border); color: var(--text-muted); }
 
         .table-container { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; overflow-x: auto; transition: background-color 0.3s; }
         table { width: 100%; border-collapse: collapse; font-size: 0.85rem; text-align: left; }
@@ -133,6 +134,7 @@
 
         <div class="filter-actions">
             <button class="btn btn-primary" onclick="filtrarRegistros()">Filtrar</button>
+            <button class="btn btn-clear" onclick="limparFiltros()">Limpar Filtros</button>
             <button class="btn btn-excel" onclick="exportarExcel()">Exportar Excel</button>
             <button class="btn btn-pdf" onclick="exportarPDF()">Exportar PDF</button>
         </div>
@@ -184,19 +186,30 @@
         document.getElementById('themeText').innerText = tema === 'dark' ? 'Modo Claro' : 'Modo Escuro';
     }
 
-    function normalizarDataISO(strData) {
-        if (!strData) return '';
-        const str = String(strData).trim();
-        
+    // Normalização universal de datas (ISO, DD/MM/YYYY, etc)
+    function normalizarDataISO(val) {
+        if (!val) return '';
+        let str = String(val).trim();
+
+        // Se for objeto de data ou carimbo ISO
+        if (str.includes('T')) {
+            str = str.split('T')[0];
+        }
+
+        // Formato YYYY-MM-DD
         if (str.match(/^\d{4}-\d{2}-\d{2}/)) {
             return str.substring(0, 10);
         }
-        
-        if (str.match(/^\d{2}\/\d{2}\/\d{4}/)) {
+
+        // Formato DD/MM/YYYY
+        if (str.match(/^\d{1,2}\/\d{1,2}\/\d{4}/)) {
             const parts = str.split('/');
-            return `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+            const dia = parts[0].padStart(2, '0');
+            const mes = parts[1].padStart(2, '0');
+            const ano = parts[2];
+            return `${ano}-${mes}-${dia}`;
         }
-        
+
         return str;
     }
 
@@ -205,12 +218,26 @@
             const response = await fetch('/api/gas?action=getRegistros');
             const data = await response.json();
             
+            console.log("Dados recebidos da API:", data);
+
             if (data.status === 'success') {
-                registrosGlobais = data.registros || [];
+                registrosGlobais = (data.registros || []).map(r => ({
+                    dataTeste: r.dataTeste || r.data || r["Data do Teste"] || '',
+                    equipamentoId: r.equipamentoId || r.idEquipamento || r["ID Equipamento"] || '',
+                    tipoEquipamento: r.tipoEquipamento || r.tipo || r["Tipo"] || '',
+                    modeloSerie: r.modeloSerie || r.modelo || r["Modelo / Nº Série"] || '',
+                    localizacao: r.localizacao || r["Localização"] || '',
+                    alarmesObtidos: r.alarmesObtidos || r.alarmes || r["Alarmes"] || '',
+                    resultado: r.resultado || r["Resultado"] || '',
+                    nomeAPAC: r.nomeAPAC || r.apac || r["APAC Responsável"] || '',
+                    observacoes: r.observacoes || r["Observações"] || '',
+                    assinaturaBase64: r.assinaturaBase64 || r.assinatura || ''
+                }));
+
                 registrosFiltrados = [...registrosGlobais];
                 renderizarTabela();
             } else {
-                document.getElementById('tableBody').innerHTML = '<tr><td colspan="10" style="text-align:center;">Erro ao carregar registros.</td></tr>';
+                document.getElementById('tableBody').innerHTML = '<tr><td colspan="10" style="text-align:center;">Nenhum registro encontrado na planilha.</td></tr>';
             }
         } catch (err) {
             console.error(err);
@@ -223,13 +250,13 @@
         tbody.innerHTML = '';
 
         if (registrosFiltrados.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;">Nenhum registro encontrado.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;">Nenhum registro encontrado para os filtros selecionados.</td></tr>';
             return;
         }
 
         registrosFiltrados.forEach(reg => {
             const tr = document.createElement('tr');
-            const isConforme = (reg.resultado || '').toUpperCase() === 'CONFORME';
+            const isConforme = String(reg.resultado || '').toUpperCase().includes('CONFORME') && !String(reg.resultado || '').toUpperCase().includes('NÃO');
 
             tr.innerHTML = `
                 <td>${reg.dataTeste || '-'}</td>
@@ -259,16 +286,27 @@
             let match = true;
             const regDataISO = normalizarDataISO(reg.dataTeste);
 
-            if (inicio && regDataISO < inicio) match = false;
-            if (fim && regDataISO > fim) match = false;
-            if (tipo && (reg.tipoEquipamento || '').toUpperCase() !== tipo.toUpperCase()) match = false;
-            if (resultado && (reg.resultado || '').toUpperCase() !== resultado.toUpperCase()) match = false;
-            if (apac && !(reg.nomeAPAC || '').toLowerCase().includes(apac)) match = false;
-            if (local && !(reg.localizacao || '').toLowerCase().includes(local)) match = false;
+            if (inicio && regDataISO && regDataISO < inicio) match = false;
+            if (fim && regDataISO && regDataISO > fim) match = false;
+            if (tipo && String(reg.tipoEquipamento).toUpperCase() !== tipo.toUpperCase()) match = false;
+            if (resultado && String(reg.resultado).toUpperCase() !== resultado.toUpperCase()) match = false;
+            if (apac && !String(reg.nomeAPAC).toLowerCase().includes(apac)) match = false;
+            if (local && !String(reg.localizacao).toLowerCase().includes(local)) match = false;
 
             return match;
         });
 
+        renderizarTabela();
+    }
+
+    function limparFiltros() {
+        document.getElementById('filterDataInicio').value = '';
+        document.getElementById('filterDataFim').value = '';
+        document.getElementById('filterTipo').value = '';
+        document.getElementById('filterResultado').value = '';
+        document.getElementById('filterApac').value = '';
+        document.getElementById('filterLocalizacao').value = '';
+        registrosFiltrados = [...registrosGlobais];
         renderizarTabela();
     }
 
