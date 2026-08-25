@@ -186,31 +186,39 @@
         document.getElementById('themeText').innerText = tema === 'dark' ? 'Modo Claro' : 'Modo Escuro';
     }
 
-    // Normalização universal de datas (ISO, DD/MM/YYYY, etc)
-    function normalizarDataISO(val) {
+    // Função para formatar qualquer string/Data para o padrão dd/mm/yyyy
+    function formatarParaDDMMYYYY(val) {
         if (!val) return '';
         let str = String(val).trim();
 
-        // Se for objeto de data ou carimbo ISO
-        if (str.includes('T')) {
-            str = str.split('T')[0];
-        }
+        if (str.includes('T')) str = str.split('T')[0];
 
-        // Formato YYYY-MM-DD
+        // Formato yyyy-mm-dd
         if (str.match(/^\d{4}-\d{2}-\d{2}/)) {
-            return str.substring(0, 10);
+            const parts = str.split('-');
+            return `${parts[2].substring(0,2)}/${parts[1]}/${parts[0]}`;
         }
 
-        // Formato DD/MM/YYYY
+        // Formato dd/mm/yyyy
         if (str.match(/^\d{1,2}\/\d{1,2}\/\d{4}/)) {
             const parts = str.split('/');
             const dia = parts[0].padStart(2, '0');
             const mes = parts[1].padStart(2, '0');
-            const ano = parts[2];
-            return `${ano}-${mes}-${dia}`;
+            return `${dia}/${mes}/${parts[2]}`;
         }
 
         return str;
+    }
+
+    // Converte datas para ISO (yyyy-mm-dd) para facilitar a comparação nos filtros
+    function normalizarParaISO(val) {
+        if (!val) return '';
+        const ddmmyyyy = formatarParaDDMMYYYY(val);
+        if (ddmmyyyy.match(/^\d{2}\/\d{2}\/\d{4}/)) {
+            const parts = ddmmyyyy.split('/');
+            return `${parts[2]}-${parts[1]}-${parts[0]}`;
+        }
+        return val;
     }
 
     async function carregarDados() {
@@ -220,19 +228,28 @@
             
             console.log("Dados recebidos da API:", data);
 
-            if (data.status === 'success') {
-                registrosGlobais = (data.registros || []).map(r => ({
-                    dataTeste: r.dataTeste || r.data || r["Data do Teste"] || '',
-                    equipamentoId: r.equipamentoId || r.idEquipamento || r["ID Equipamento"] || '',
-                    tipoEquipamento: r.tipoEquipamento || r.tipo || r["Tipo"] || '',
-                    modeloSerie: r.modeloSerie || r.modelo || r["Modelo / Nº Série"] || '',
-                    localizacao: r.localizacao || r["Localização"] || '',
-                    alarmesObtidos: r.alarmesObtidos || r.alarmes || r["Alarmes"] || '',
-                    resultado: r.resultado || r["Resultado"] || '',
-                    nomeAPAC: r.nomeAPAC || r.apac || r["APAC Responsável"] || '',
-                    observacoes: r.observacoes || r["Observações"] || '',
-                    assinaturaBase64: r.assinaturaBase64 || r.assinatura || ''
-                }));
+            if (data.status === 'success' && Array.isArray(data.registros)) {
+                registrosGlobais = data.registros.map(r => {
+                    const idUpper = String(r.equipamentoId || '').toUpperCase();
+                    const modUpper = String(r.modeloSerie || '').toUpperCase();
+                    let tipoCalculado = 'PDM';
+                    if (idUpper.includes('DMM') || modUpper.includes('DMM') || modUpper.includes('SUPERSCANNER')) {
+                        tipoCalculado = 'DMM';
+                    }
+
+                    return {
+                        dataTeste: formatarParaDDMMYYYY(r.dataTeste),
+                        equipamentoId: r.equipamentoId || '-',
+                        tipoEquipamento: tipoCalculado,
+                        modeloSerie: r.modeloSerie || '-',
+                        localizacao: r.localizacao || '-',
+                        alarmesObtidos: r.alarmesObtidos || '-',
+                        resultado: r.resultado || 'CONFORME',
+                        nomeAPAC: r.nomeAPAC || '-',
+                        observacoes: r.observacoes || '-',
+                        assinaturaBase64: r.assinaturaBase64 || ''
+                    };
+                });
 
                 registrosFiltrados = [...registrosGlobais];
                 renderizarTabela();
@@ -256,18 +273,19 @@
 
         registrosFiltrados.forEach(reg => {
             const tr = document.createElement('tr');
-            const isConforme = String(reg.resultado || '').toUpperCase().includes('CONFORME') && !String(reg.resultado || '').toUpperCase().includes('NÃO');
+            const resUpper = String(reg.resultado || '').toUpperCase();
+            const isConforme = resUpper.includes('CONFORME') && !resUpper.includes('NÃO');
 
             tr.innerHTML = `
-                <td>${reg.dataTeste || '-'}</td>
-                <td>${reg.equipamentoId || '-'}</td>
-                <td>${reg.tipoEquipamento || '-'}</td>
-                <td>${reg.modeloSerie || '-'}</td>
-                <td>${reg.localizacao || '-'}</td>
-                <td>${reg.alarmesObtidos || '-'}</td>
-                <td><span class="badge ${isConforme ? 'badge-conforme' : 'badge-nao-conforme'}">${reg.resultado || '-'}</span></td>
-                <td>${reg.nomeAPAC || '-'}</td>
-                <td>${reg.observacoes || '-'}</td>
+                <td>${reg.dataTeste}</td>
+                <td>${reg.equipamentoId}</td>
+                <td>${reg.tipoEquipamento}</td>
+                <td>${reg.modeloSerie}</td>
+                <td>${reg.localizacao}</td>
+                <td>${reg.alarmesObtidos}</td>
+                <td><span class="badge ${isConforme ? 'badge-conforme' : 'badge-nao-conforme'}">${reg.resultado}</span></td>
+                <td>${reg.nomeAPAC}</td>
+                <td>${reg.observacoes}</td>
                 <td>${reg.assinaturaBase64 ? `<img src="${reg.assinaturaBase64}" class="sig-thumb" alt="Assinatura">` : '-'}</td>
             `;
             tbody.appendChild(tr);
@@ -275,8 +293,8 @@
     }
 
     function filtrarRegistros() {
-        const inicio = document.getElementById('filterDataInicio').value;
-        const fim = document.getElementById('filterDataFim').value;
+        const inicio = document.getElementById('filterDataInicio').value; // yyyy-mm-dd
+        const fim = document.getElementById('filterDataFim').value;       // yyyy-mm-dd
         const tipo = document.getElementById('filterTipo').value;
         const resultado = document.getElementById('filterResultado').value;
         const apac = document.getElementById('filterApac').value.toLowerCase().trim();
@@ -284,11 +302,11 @@
 
         registrosFiltrados = registrosGlobais.filter(reg => {
             let match = true;
-            const regDataISO = normalizarDataISO(reg.dataTeste);
+            const regDataISO = normalizarParaISO(reg.dataTeste);
 
             if (inicio && regDataISO && regDataISO < inicio) match = false;
             if (fim && regDataISO && regDataISO > fim) match = false;
-            if (tipo && String(reg.tipoEquipamento).toUpperCase() !== tipo.toUpperCase()) match = false;
+            if (tipo && reg.tipoEquipamento.toUpperCase() !== tipo.toUpperCase()) match = false;
             if (resultado && String(reg.resultado).toUpperCase() !== resultado.toUpperCase()) match = false;
             if (apac && !String(reg.nomeAPAC).toLowerCase().includes(apac)) match = false;
             if (local && !String(reg.localizacao).toLowerCase().includes(local)) match = false;
